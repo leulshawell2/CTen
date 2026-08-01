@@ -2,7 +2,7 @@
 
 
 int main(){
-    uint dim = 3;
+    uint dim = 2;
     int shape[dim];
 
     for(uint8 d =0; d < dim; d++){
@@ -10,14 +10,13 @@ int main(){
     }
 
     tensor t = build_tensor(dim, shape, sizeof(float), NULL);
-    
-    tensor clone = tensor_clone(t); 
-    tensor copy = tensor_copy(t); 
+    tensor tt = build_tensor(dim, shape, sizeof(float), NULL);
+    tensor t2 = build_tensor(dim, shape, sizeof(float), NULL);
 
 
-    print_data(t);
-    print_data(clone);
-    print_data(copy);
+
+    print_data(t2);
+
     return 0;
 
 }

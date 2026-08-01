@@ -85,3 +85,8 @@ tensor tensor_clone(tensor t);
  * it is a call to contiguous
  */
 tensor tensor_copy(tensor t);
+
+tensor concat_new_dim(tensor t1, tensor t2);
+
+
+void shape_copy(tensor t1, int* buff);

@@ -11,6 +11,16 @@ int* tensor_stride(tensor t){
     return t.meta.stride;
 }
 
+
+void shape_copy(tensor t1, int* shape){
+
+    for(int d=0; d < t1.meta.dim; d++){
+        shape[d] = t1.meta.shape[d];
+    }
+
+}
+
+
 void tensor_transpose(tensor t, uint8 dim1, uint8 dim2){
     tensor_meta m = t.meta;
 

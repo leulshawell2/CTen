@@ -2,9 +2,6 @@
 #include "ctensor.h"
 
 
-/**
- * create a new contiguous tensor
- */
 tensor tensor_contiguous(tensor t){
     
     tensor t1 = build_tensor(t.meta.dim, t.meta.shape, t.meta.e_size, NULL);
@@ -34,25 +31,29 @@ tensor tensor_contiguous(tensor t){
         }
     }
 
-    printf("%p\n", t.data);
-    printf("%p\n", t1.data);
-
     return t1;
 }
 
 
-/**
- * return a new tensor that points to the same data block
- */
+
 tensor tensor_clone(tensor t){
     return  build_tensor(t.meta.dim, t.meta.shape, t.meta.e_size, t.data);
 }
 
-/**
- * creates a new tensor (exact but contiguous copy) 
- * it is a call to contiguous
- */
+
 tensor tensor_copy(tensor t){
     return tensor_contiguous(t);
+
+}
+
+
+tensor tensor_concat(tensor t1, tensor t2){
+
+}
+
+
+void zero_init(tensor t){
+    for(int i=0; i < t.meta.size; i++ )
+        ((float*)t.data)[i] = 0.0;
 
 }
