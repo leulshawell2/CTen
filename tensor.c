@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include  "meta.c"
+#include  "ctensor.h"
 
 
 int size(tensor t){
@@ -14,6 +14,7 @@ int size(tensor t){
 void print_data(tensor t){
     tensor_meta m = t.meta;
     
+    printf("\n");
     for (uint i = 0; i < m.size; i++) {
         int i1 = 0;
 
@@ -24,6 +25,7 @@ void print_data(tensor t){
         printf("%f,\t", ((float*)t.data)[i1]);
     }
     printf("\n");
+
 }
 
 
@@ -54,8 +56,14 @@ tensor build_tensor(uint8 dim, int* shape, uint8 e_size, void* data){
 
     memcpy(t.meta._stride, t.meta.stride, meta_size);
     
-    if (!data){
+    if(data){
+        t.data = data;
+    }else{
         t.data = malloc(size * e_size);
+        if(t.data == NULL){
+            printf("Error allocating memory. size: %d", size * e_size);
+            exit(1);
+        }
     }
 
     for(int i=0; i < size; i++){
@@ -66,8 +74,9 @@ tensor build_tensor(uint8 dim, int* shape, uint8 e_size, void* data){
 }
 
 
-void free_tensor(tensor t) {
+void free_tensor(tensor t){
     free(t.meta.shape);
+    free((void*)t.data);
 }
 
 

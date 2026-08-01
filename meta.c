@@ -1,5 +1,5 @@
-#include "type.h"
 #include <stdio.h>
+#include "ctensor.h"
 
 
 int* tensor_shape(tensor t){
