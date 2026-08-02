@@ -1,21 +1,28 @@
-#include "ctensor.h"
+#include "libtensor.h"
 
 
 int main(){
-    uint dim = 2;
+    uint dim = 4;
     int shape[dim];
 
+    shape[0] = 1;
+    shape[1] = 256;
+
+    tensor t = tensor_build(2, shape, sizeof(float), NULL);
+
+
     for(uint8 d =0; d < dim; d++){
-        shape[d] = 3;
+        shape[d] = 4;
     }
 
-    tensor t = build_tensor(dim, shape, sizeof(float), NULL);
-    tensor tt = build_tensor(dim, shape, sizeof(float), NULL);
-    tensor t2 = build_tensor(dim, shape, sizeof(float), NULL);
+    t.meta.stride[0] = 0;
 
 
+    print_meta(t);
 
-    print_data(t2);
+    tensor t2 = tensor_view(t, shape, 4);
+
+    print_meta(t2);
 
     return 0;
 

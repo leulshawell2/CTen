@@ -1,9 +1,20 @@
 #include  <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #define GET_MIXED_RADIX_DIGIT(i, n, strides, shape)  (((i) / (strides)[n]) % (shape)[n])
 
 
+#define MAX(a, b)  (a) > (b)? a: b
+#define MIN(a, b)  (a) > (b)? b: a
+#define True  1
+#define False 0
+
+#define FATAL_ERROR(c, msg, args...)  printf(msg, args); exit(c);
+                                
 
 typedef unsigned char uint8;
+typedef uint8 boolean;
 typedef char int8;
 typedef unsigned int uint;
 
@@ -41,7 +52,7 @@ void tensor_transpose(tensor t, uint8 dim1, uint8 dim2);
 /**
  * element count of the tensor
  */
-int size(tensor t);
+int tensor_size(tensor t);
 
 /**
  * prints meta data of tensor
@@ -62,12 +73,12 @@ void print_data(tensor t);
  * 
  * 
  */
-tensor build_tensor(uint8 dim, int* shape, uint8 e_size, void* data);
+tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data);
 
 /**
  * frees every memory held by a tensor
  */
-void free_tensor(tensor t);
+void tensor_free(tensor t);
 
 
 /**
@@ -86,7 +97,11 @@ tensor tensor_clone(tensor t);
  */
 tensor tensor_copy(tensor t);
 
-tensor concat_new_dim(tensor t1, tensor t2);
 
+void tensor_shape_copy(tensor t1, int* buff);
 
-void shape_copy(tensor t1, int* buff);
+tensor tensor_view(tensor t1, int* shape, int dim);
+
+int size(int* shape, uint8 dim);
+
+boolean tensor_iscontiguous(tensor t);
