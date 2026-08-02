@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define GET_MIXED_RADIX_DIGIT(i, n, strides, shape)  (((i) / (strides)[n]) % (shape)[n])
-
+// Column-Major: Left digit (n=0) varies fastest
+#define GET_MIXED_RADIX_DIGIT(i, n, strides, shape)  (((i) / (strides)[n]) % (shape)[n])   
 
 #define MAX(a, b)  (a) > (b)? a: b
 #define MIN(a, b)  (a) > (b)? b: a
@@ -98,9 +98,11 @@ tensor tensor_clone(tensor t);
 tensor tensor_copy(tensor t);
 
 
-void tensor_shape_copy(tensor t1, int* buff);
+void tensor_shape_copy(tensor t, int* buff);
 
-tensor tensor_view(tensor t1, int* shape, int dim);
+tensor tensor_view(tensor t, int* shape, int dim);
+tensor tensor_reshape(tensor t, int* shape, int dim);
+tensor tensor_repeat(tensor t, int* repeat);
 
 int size(int* shape, uint8 dim);
 
