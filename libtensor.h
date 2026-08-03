@@ -21,7 +21,9 @@ typedef unsigned int uint;
 typedef struct {
     int* shape;
     int* stride;
-    int* _stride;
+    //this is always the contiguous stride. 
+    //Never Change. Used for MIxed Radix Count and contiguity check
+    int* __stride; 
     uint8 dim;
     uint size;
     uint8 e_size;
@@ -32,6 +34,8 @@ typedef struct {
     void* data;
 } tensor;
 
+
+void meta_stride(int* shape, int* strides, int dim);
 
 /**
  * get shape of a tensor
@@ -57,12 +61,12 @@ int tensor_size(tensor t);
 /**
  * prints meta data of tensor
  */
-void print_meta(tensor t);
+void tensor_print_meta(tensor t);
 
 /**
  * prints the data block of a tensor
  */
-void print_data(tensor t);
+void tensor_print_data(tensor t);
 
 /**
  * build tensor & dim
@@ -100,10 +104,45 @@ tensor tensor_copy(tensor t);
 
 void tensor_shape_copy(tensor t, int* buff);
 
+/**
+ * allows viewing a tensor with different shape
+ * required contuguous and return non-contiguous (No copy)
+ */
 tensor tensor_view(tensor t, int* shape, int dim);
+
+
+/**
+ * same as view but first calls contiguous if tensor is not contiguous
+ * 
+ */
 tensor tensor_reshape(tensor t, int* shape, int dim);
+
+/**
+ * takes a repeat array and repeats every dimention awith that number
+ * {2, 3, 4} means repeat dim 0 twice, dim 1 3 times and dim 2 4 time
+ * returns contiguous memory
+ */
 tensor tensor_repeat(tensor t, int* repeat);
 
 int size(int* shape, uint8 dim);
 
+/**
+ * check if a tensor is contiguous.
+ * calculates new strides and compares with the current
+ */
 boolean tensor_iscontiguous(tensor t);
+
+/**
+ * Set the all properties of a tenor meta
+ */
+void meta_set(tensor_meta dest, int* shape, int* stride, int dim);
+
+/**
+ * print a meta data
+ */
+void meta_print(tensor_meta* meta);
+
+/**
+ * free meta data memory (the shape, stride and __stride)
+ */
+void meta_free(tensor_meta *meta);

@@ -26,10 +26,28 @@ void tensor_shape_copy(tensor t1, int* shape){
 }
 
 
-void _stride(int* shape, int* strides, int dim){
+void meta_free(tensor_meta* meta){
+    /**the meta data memory starts at shape so we free that  */
+    free(meta->shape);
+}
+
+void meta_stride(int* shape, int* strides, int dim){
     strides[0] = 1;
     for (int8 d = 1; d < dim; d++)
-        strides[d] = shape[d] * strides[d-1];
+        strides[d] = shape[d-1] * strides[d-1];
+}
+
+
+
+
+
+void meta_set(tensor_meta dest, int* shape, int* stride, int dim){
+    memcpy(dest.shape, shape, dim);
+    memcpy(dest.stride, stride, dim);
+    memcpy(dest.__stride, stride, dim);
+    dest.dim = dim;
+    dest.size = size(shape, dim);
+
 
 }
 
@@ -44,12 +62,7 @@ boolean _array_equal(int* a1, int* a2, int size){
 
 
 boolean tensor_iscontiguous(tensor t){
-    int con_strides[t.meta.dim];
-    _stride(t.meta.shape, con_strides, t.meta.dim);
-
-    return _array_equal(t.meta.stride, con_strides, t.meta.dim);
-
-
+    return _array_equal(t.meta.stride, t.meta.__stride, t.meta.dim);
 }
 
 
@@ -74,10 +87,18 @@ void tensor_transpose(tensor t, uint8 dim1, uint8 dim2){
 
 }
 
-void print_meta(tensor t){
-        printf("Size=%d Dim=%d, Shape=[", t.meta.size, t.meta.dim);
-        for(int i=0; i<t.meta.dim; i++) printf("%d%s", t.meta.shape[i], i==t.meta.dim-1?"":",");
+void tensor_print_meta(tensor t){
+        printf("Addr=%p ", t.data);
+        meta_print(&t.meta);
+
+}
+
+void meta_print(tensor_meta* meta){
+        printf("Size=%d Dim=%d, Shape=[",  meta->size,  meta->dim);
+        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->shape[i], i== meta->dim-1?"":",");
         printf("], Stride=[");
-        for(int i=0; i<t.meta.dim; i++) printf("%d%s", t.meta.stride[i], i==t.meta.dim-1?"":",");
-        printf("] Addr=%p\n", t.data);
+        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->stride[i], i== meta->dim-1?"":",");
+        printf("], __Stride=[");
+        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->__stride[i], i== meta->dim-1?"":",");
+        printf("]\n");
 }

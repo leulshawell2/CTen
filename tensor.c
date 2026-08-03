@@ -3,7 +3,8 @@
 
 
 
-void print_data(tensor t){
+
+void tensor_print_data(tensor t){
     tensor_meta m = t.meta;
     
     printf("\n");
@@ -11,7 +12,7 @@ void print_data(tensor t){
         int i1 = 0;
 
         for(uint8 d=0; d < m.dim; d++){
-            int coord = GET_MIXED_RADIX_DIGIT(i, d, m._stride, m.shape);
+            int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
             i1 += (coord * m.stride[d]);
         }
         printf("%f,\t", ((float*)t.data)[i1]);
@@ -36,22 +37,21 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
     int meta_size = sizeof(int) * dim;
     
     void* meta = malloc(meta_size * 3);
-
     t.meta.shape = meta;
     memcpy(t.meta.shape, shape, meta_size);
 
-
     
-
+    
+    
     t.meta.stride = meta + meta_size;
-    t.meta._stride = meta + 2 * meta_size;
-
+    t.meta.__stride = meta + 2 * meta_size;
+    
     t.meta.stride[0] = 1;
     for (int8 d = 1; d < dim; d++)
         t.meta.stride[d] = shape[d-1] * t.meta.stride[d-1];
 
 
-    memcpy(t.meta._stride, t.meta.stride, meta_size);
+    memcpy(t.meta.__stride, t.meta.stride, meta_size);
     
     if(data){
         t.data = data;
@@ -61,14 +61,15 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
             FATAL_ERROR(1, "MemoryError: error alocating memory size: %d", size * e_size)
         }
     }
+
     
     return t;
 }
 
 
 void tensor_free(tensor t){
-    free(t.meta.shape);
-    free((void*)t.data);
+    meta_free(&t.meta);
+    free(t.data);
 }
 
 tensor tensor_clone(tensor t){
@@ -105,7 +106,7 @@ tensor tensor_contiguous(tensor t){
         for (int i = start; i < end; i++) {
             int i1 = 0;
             for(uint8 d=0; d < m1.dim; d++){
-                int coord = GET_MIXED_RADIX_DIGIT(i, d, m1._stride, m1.shape);
+                int coord = GET_MIXED_RADIX_DIGIT(i, d, m1.__stride, m1.shape);
                 i1 += (coord * t.meta.stride[d]);
             }
             ((float*)t1.data)[i] = ((float*)t.data)[i1];
@@ -117,43 +118,37 @@ tensor tensor_contiguous(tensor t){
 
 
 
-
 /**
  * No copy to same size
  */
-tensor tensor_view(tensor t1, int* shape, int dim){
+tensor tensor_view(tensor t, int* shape, int dim){
 
     if(dim==0)
-        dim = t1.meta.dim;
+        dim = t.meta.dim;
     else{
         int size_ = size(shape, dim);
-        if (size_ != t1.meta.size){
-            FATAL_ERROR(1, "ViewError:  tensor size %d -> %d", t1.meta.size, size_)
+        if (size_ != t.meta.size){
+            FATAL_ERROR(1, "ViewError:  tensor size %d -> %d", t.meta.size, size_)
         }
     }
 
-    if(!tensor_iscontiguous(t1)){
+    if(!tensor_iscontiguous(t)){
         FATAL_ERROR(1, "ViewError: tensor is not contiguous", 0)
     }
     
-    return tensor_build(dim, shape, t1.meta.e_size, t1.data);
+    return tensor_build(dim, shape, t.meta.e_size, t.data);
     
 }
-
-/**
- * No copy to higher dim
- */
-tensor tensor_broadcast(tensor t, int* shape, int dim){
-    
-}
-
 
 tensor tensor_reshape(tensor t, int* shape, int dim){
     if(tensor_iscontiguous(t))
         return tensor_view(t, shape, dim);
 
     tensor temp = tensor_contiguous(t);
-    return tensor_view(temp, shape, dim);
+    tensor res = tensor_view(temp, shape, dim);
+    meta_free(&temp.meta);
+
+    return res;
 }
 
 
@@ -161,27 +156,38 @@ tensor tensor_repeat(tensor t, int* repeat){
     int temp_dim = t.meta.dim * 2;
     int shape[temp_dim];
     int strides[temp_dim];
+    int new_shape[t.meta.dim];
 
-    
+    int d_2;
     for(uint8 d=0; d < temp_dim; d += 2){
-        shape[d] = repeat[d/2];
-        shape[d+1] = t.meta.shape[d/2];
+        d_2 = d/2;
+        shape[d] = repeat[d_2];
+        shape[d+1] = t.meta.shape[d_2];
 
         strides[d] = 0;
-        strides[d+1] = t.meta.stride[d/2];
+        strides[d+1] = t.meta.stride[d_2];
+        new_shape[d_2] = t.meta.shape[d_2] * repeat[d_2];
+        
 
     }
+
     
-    int new_shape[t.meta.dim];
-    for(int d=0; d < t.meta.dim; d++){
-        new_shape[d] = t.meta.shape[d] * repeat[d];
-    }
 
     tensor temp = tensor_build(temp_dim, shape, t.meta.e_size, t.data);
+
     temp.meta.stride = strides;
     temp.meta.shape = shape;
+    
     temp = tensor_contiguous(temp);
 
-    return temp;
+    tensor res = tensor_build(t.meta.dim, new_shape, t.meta.e_size, temp.data);
+
+    meta_free(&temp.meta);
+
+    return res;
 
 }   
+
+tensor tensor_broadcast(tensor t, int* shape, int dim){
+    
+}
