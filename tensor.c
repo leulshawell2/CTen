@@ -1,5 +1,10 @@
-#include <omp.h>
+
 #include  "libtensor.h"
+
+#ifdef OMP
+#include <omp.h>
+#endif
+
 
 
 
@@ -89,26 +94,27 @@ tensor tensor_copy(tensor t){
 }
 
 
-
 tensor tensor_contiguous(tensor t){
     
     tensor t1 = tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, NULL);
     tensor_meta m1 = t1.meta;
 
-
+#ifdef OMP
     #pragma omp parallel
     {
         int nthreads = omp_get_num_threads();
         int tid = omp_get_thread_num();
 
-        int rows_per_thread = (m1.size + nthreads-1) / nthreads;
-        int start  = tid * rows_per_thread;
-        int end = start + rows_per_thread;
-
+        int w_ = (m1.size + nthreads-1) / nthreads;
+        int start  = tid * w_;
+        int end = start + w_;
         if (end > m1.size){
             end = m1.size;
         }
-
+#else
+        int start = 0;
+        int end = m1.size;
+#endif
         for (int i = start; i < end; i++) {
             int i1 = 0;
             for(uint8 d=0; d < m1.dim; d++){
@@ -117,7 +123,9 @@ tensor tensor_contiguous(tensor t){
             }
             ((float*)t1.data)[i] = ((float*)t.data)[i1];
         }
+#ifdef OMP
     }
+#endif
 
     return t1;
 }

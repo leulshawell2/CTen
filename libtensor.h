@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define OMP
+
+
 // Column-Major: Left digit (n=0) varies fastest
 #define GET_MIXED_RADIX_DIGIT(i, n, strides, shape)  (((i) / (strides)[n]) % (shape)[n])   
 
