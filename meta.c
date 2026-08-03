@@ -118,15 +118,18 @@ tensor tensor_permute(tensor t, uint8* dims){
     tensor_meta m = t.meta;
 
     int new_shape[m.dim];
+    int temp = 0;
+    int d2;
 
     memcpy(new_shape, m.shape, m.dim * sizeof(int));
-    int temp;
-    int d2;
     for(uint8 d=0; d < t.meta.dim; d++){
         d2 = dims[d];
+        if(d2 < d)
+            continue;    
         temp = new_shape[d];
         new_shape[d] = new_shape[d2];
         new_shape[d2] = temp;
+
     }
     
     
@@ -136,9 +139,11 @@ tensor tensor_permute(tensor t, uint8* dims){
 
     for(uint8 d=0; d < t.meta.dim; d++){
         d2 = dims[d];
-        temp = m.stride[d];
-        res.meta.stride[d] = res.meta.stride[d2];
-        res.meta.stride[d2] = temp;
+        if (d2 < d)
+            continue;
+            temp = m.stride[d];
+            res.meta.stride[d] = res.meta.stride[d2];
+            res.meta.stride[d2] = temp;
     }
 
 

@@ -132,7 +132,11 @@ tensor tensor_contiguous(tensor t){
                 int coord = GET_MIXED_RADIX_DIGIT(i, d, m1.__stride, m1.shape);
                 i1 += (coord * t.meta.stride[d]);
             }
-            ((float*)t1.data)[i] = ((float*)t.data)[i1];
+            void* des_pos = t1.data + m1.e_size * i;
+            void* src_pos = t.data + m1.e_size * i1;
+            memcpy(des_pos, src_pos, m1.e_size);
+
+            // ((float*)t1.data)[i] = ((float*)t.data)[i1];
         }
 #ifdef OMP
     }
