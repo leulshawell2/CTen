@@ -113,7 +113,6 @@ tensor tensor_view(tensor t, int* shape, int dim);
 
 /**
  * same as view but first calls contiguous if tensor is not contiguous
- * 
  */
 tensor tensor_reshape(tensor t, int* shape, int dim);
 
@@ -124,7 +123,15 @@ tensor tensor_reshape(tensor t, int* shape, int dim);
  */
 tensor tensor_repeat(tensor t, int* repeat);
 
-int size(int* shape, uint8 dim);
+/**
+ * broadcast and tensor for ops. add new dimas and expand dim sizes of 1
+ */
+tensor tensor_broadcast(tensor t, int* shape, int dim);
+
+/**
+ * calculate size for shape
+ */
+int meta_size(int* shape, uint8 dim);
 
 /**
  * check if a tensor is contiguous.

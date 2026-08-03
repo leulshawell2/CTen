@@ -126,7 +126,7 @@ tensor tensor_view(tensor t, int* shape, int dim){
     if(dim==0)
         dim = t.meta.dim;
     else{
-        int size_ = size(shape, dim);
+        int size_ = meta_size(shape, dim);
         if (size_ != t.meta.size){
             FATAL_ERROR(1, "ViewError:  tensor size %d -> %d", t.meta.size, size_)
         }
@@ -189,5 +189,31 @@ tensor tensor_repeat(tensor t, int* repeat){
 }   
 
 tensor tensor_broadcast(tensor t, int* shape, int dim){
+    if(dim < t.meta.dim){
+        FATAL_ERROR(1, "BroadcastError: dim : %d < %d", dim, t.meta.dim);
+    }
+    int new_shape[dim];
+    int new_stride[dim];
+
+    for(int d=0; d < dim; d++){
+        if(d < t.meta.dim){
+            if(shape[d] != t.meta.shape[d]){
+                if(t.meta.shape[d] != 1){
+                    FATAL_ERROR(1, "BroadCastError: can't expand non singular dim: %d. %d -> %d", d, t.meta.shape[d], shape[d]);
+                }
+                new_stride[d] = 0;
+            }else{
+                new_stride[d] = t.meta.stride[d];
+            }
+        }else {
+            new_stride[d] = 0;
+        }
+        new_shape[d] = shape[d];
+    }
     
+    tensor res = tensor_build(dim, new_shape, t.meta.e_size, t.data);
+    
+    memcpy(res.meta.stride, new_stride, dim * sizeof(int));
+
+    return res;
 }

@@ -13,7 +13,7 @@ int* tensor_stride(tensor t){
 
 
 int tensor_size(tensor t){
-    return size(t.meta.shape, t.meta.dim);
+    return meta_size(t.meta.shape, t.meta.dim);
 }
 
 
@@ -42,11 +42,13 @@ void meta_stride(int* shape, int* strides, int dim){
 
 
 void meta_set(tensor_meta dest, int* shape, int* stride, int dim){
-    memcpy(dest.shape, shape, dim);
-    memcpy(dest.stride, stride, dim);
-    memcpy(dest.__stride, stride, dim);
+    int size = dim * sizeof(int);
+    memcpy(dest.shape, shape, size);
+    memcpy(dest.stride, stride, size);
+    
+    meta_stride(shape, dest.__stride, dim);
     dest.dim = dim;
-    dest.size = size(shape, dim);
+    dest.size = meta_size(shape, dim);
 
 
 }
@@ -66,7 +68,7 @@ boolean tensor_iscontiguous(tensor t){
 }
 
 
-int size(int* shape, uint8 dim){
+int meta_size(int* shape, uint8 dim){
     int size = 1;
     for(int d=0; d < dim; d++)
         size *= shape[d];
