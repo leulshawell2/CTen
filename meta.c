@@ -2,28 +2,6 @@
 #include "libtensor.h"
 
 
-int* tensor_shape(tensor t){
-    return t.meta.shape;
-}
-
-
-int* tensor_stride(tensor t){
-    return t.meta.stride;
-}
-
-
-int tensor_size(tensor t){
-    return meta_size(t.meta.shape, t.meta.dim);
-}
-
-
-void tensor_shape_copy(tensor t1, int* shape){
-
-    for(int d=0; d < t1.meta.dim; d++){
-        shape[d] = t1.meta.shape[d];
-    }
-
-}
 
 
 void meta_free(tensor_meta* meta){
@@ -63,11 +41,6 @@ boolean _array_equal(int* a1, int* a2, int size){
 
 
 
-boolean tensor_iscontiguous(tensor t){
-    return _array_equal(t.meta.stride, t.meta.__stride, t.meta.dim);
-}
-
-
 int meta_size(int* shape, uint8 dim){
     int size = 1;
     for(int d=0; d < dim; d++)
@@ -75,6 +48,56 @@ int meta_size(int* shape, uint8 dim){
 
     return size;
 }
+
+
+void meta_print(tensor_meta* meta){
+        printf("Size=%d Dim=%d, Shape=[",  meta->size,  meta->dim);
+        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->shape[i], i== meta->dim-1?"":",");
+        printf("], Stride=[");
+        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->stride[i], i== meta->dim-1?"":",");
+        printf("], __Stride=[");
+        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->__stride[i], i== meta->dim-1?"":",");
+        printf("] Error=%d Sub-Error=%d\n", meta->err, meta->sub_err);
+        
+}
+
+
+void tensor_print_meta(tensor t){
+        printf("Addr=%p ", t.data);
+        meta_print(&t.meta);
+
+}
+
+
+
+boolean tensor_iscontiguous(tensor t){
+    return _array_equal(t.meta.stride, t.meta.__stride, t.meta.dim);
+}
+
+int* tensor_shape(tensor t){
+    return t.meta.shape;
+}
+
+
+int* tensor_stride(tensor t){
+    return t.meta.stride;
+}
+
+
+int tensor_size(tensor t){
+    return meta_size(t.meta.shape, t.meta.dim);
+}
+
+
+void tensor_shape_copy(tensor t1, int* shape){
+
+    for(int d=0; d < t1.meta.dim; d++){
+        shape[d] = t1.meta.shape[d];
+    }
+
+}
+
+
 
 void tensor_transpose(tensor t, uint8 dim1, uint8 dim2){
     tensor_meta m = t.meta;
@@ -87,20 +110,4 @@ void tensor_transpose(tensor t, uint8 dim1, uint8 dim2){
     m.stride[dim1] = m.stride[dim2];
     m.stride[dim2] = temp;
 
-}
-
-void tensor_print_meta(tensor t){
-        printf("Addr=%p ", t.data);
-        meta_print(&t.meta);
-
-}
-
-void meta_print(tensor_meta* meta){
-        printf("Size=%d Dim=%d, Shape=[",  meta->size,  meta->dim);
-        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->shape[i], i== meta->dim-1?"":",");
-        printf("], Stride=[");
-        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->stride[i], i== meta->dim-1?"":",");
-        printf("], __Stride=[");
-        for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->__stride[i], i== meta->dim-1?"":",");
-        printf("]\n");
 }

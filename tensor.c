@@ -23,8 +23,11 @@ void tensor_print_data(tensor t){
 
 
 tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
-
+    
     tensor t;
+
+    t.meta.err = 0;
+    t.meta.sub_err = 0;
     t.meta.dim = dim;
     t.meta.e_size = e_size;
 
@@ -37,6 +40,9 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
     int meta_size = sizeof(int) * dim;
     
     void* meta = malloc(meta_size * 3);
+    if(!meta){
+        ERROR(MEM_ERR, MALLOC_ERR, t)
+    }
     t.meta.shape = meta;
     memcpy(t.meta.shape, shape, meta_size);
 
@@ -58,7 +64,7 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
     }else{
         t.data = malloc(size * e_size);
         if(t.data == NULL){
-            FATAL_ERROR(1, "MemoryError: error alocating memory size: %d", size * e_size)
+            ERROR(MEM_ERR, MALLOC_ERR, t)
         }
     }
 
@@ -128,12 +134,12 @@ tensor tensor_view(tensor t, int* shape, int dim){
     else{
         int size_ = meta_size(shape, dim);
         if (size_ != t.meta.size){
-            FATAL_ERROR(1, "ViewError:  tensor size %d -> %d", t.meta.size, size_)
+            ERROR(OP_ERR, SIZE_ERR, t)
         }
     }
 
     if(!tensor_iscontiguous(t)){
-        FATAL_ERROR(1, "ViewError: tensor is not contiguous", 0)
+        ERROR(OP_ERR, CONTG_ERR, t)
     }
     
     return tensor_build(dim, shape, t.meta.e_size, t.data);
@@ -190,7 +196,7 @@ tensor tensor_repeat(tensor t, int* repeat){
 
 tensor tensor_broadcast(tensor t, int* shape, int dim){
     if(dim < t.meta.dim){
-        FATAL_ERROR(1, "BroadcastError: dim : %d < %d", dim, t.meta.dim);
+        ERROR(OP_ERR, DIM_ERR, t)
     }
     int new_shape[dim];
     int new_stride[dim];
@@ -199,7 +205,7 @@ tensor tensor_broadcast(tensor t, int* shape, int dim){
         if(d < t.meta.dim){
             if(shape[d] != t.meta.shape[d]){
                 if(t.meta.shape[d] != 1){
-                    FATAL_ERROR(1, "BroadCastError: can't expand non singular dim: %d. %d -> %d", d, t.meta.shape[d], shape[d]);
+                    ERROR(OP_ERR, DIM_ERR, t)
                 }
                 new_stride[d] = 0;
             }else{

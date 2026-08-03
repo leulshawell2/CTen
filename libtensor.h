@@ -10,8 +10,25 @@
 #define True  1
 #define False 0
 
-#define FATAL_ERROR(c, msg, args...)  printf(msg, args); exit(c);
-                                
+// #define FATAL_ERROR(c, m, a...)  printf(m, a); exit(c);
+
+
+//takes code, sub-code, tensor
+#define ERROR(c, sc, t)  (t).meta.err = c; (t).meta.sub_err = sc; return t;
+
+
+#define OP_ERR  1
+#define MEM_ERR 2
+#define THREAD_ERR 3 
+
+#define MALLOC_ERR 1
+#define FREE_ERR   2
+#define DIM_ERR    3
+#define SIZE_ERR   4
+#define CONTG_ERR  5
+
+
+                        
 
 typedef unsigned char uint8;
 typedef uint8 boolean;
@@ -27,11 +44,14 @@ typedef struct {
     uint8 dim;
     uint size;
     uint8 e_size;
+    int err;
+    int sub_err;
 } tensor_meta;
 
 typedef struct {
     tensor_meta meta;
     void* data;
+    
 } tensor;
 
 
