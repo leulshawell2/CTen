@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "libtensor.h"
+#include "cten.h"
 
 
 
@@ -14,8 +14,6 @@ void meta_stride(int* shape, int* strides, int dim){
     for (int8 d = 1; d < dim; d++)
         strides[d] = shape[d-1] * strides[d-1];
 }
-
-
 
 
 
@@ -51,7 +49,7 @@ int meta_size(int* shape, uint8 dim){
 
 
 void meta_print(tensor_meta* meta){
-        printf("Size=%d Dim=%d, Shape=[",  meta->size,  meta->dim);
+        printf("Size=%d Dim=%d, Ref=%d Shape=[",  meta->size,  meta->dim, *meta->ref);
         for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->shape[i], i== meta->dim-1?"":",");
         printf("], Stride=[");
         for(int i=0; i< meta->dim; i++) printf("%d%s",  meta->stride[i], i== meta->dim-1?"":",");
@@ -72,15 +70,6 @@ void tensor_print_meta(tensor t){
 
 boolean tensor_iscontiguous(tensor t){
     return _array_equal(t.meta.stride, t.meta.__stride, t.meta.dim);
-}
-
-int* tensor_shape(tensor t){
-    return t.meta.shape;
-}
-
-
-int* tensor_stride(tensor t){
-    return t.meta.stride;
 }
 
 

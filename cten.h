@@ -31,6 +31,9 @@
 #define CONTG_ERR  5
 
 
+//some helpers i don't want to be function calls
+#define tensor_isshared(t)  *((t).meta.ref) != 0
+
                         
 
 typedef unsigned char uint8;
@@ -49,6 +52,12 @@ typedef struct {
     uint8 e_size;
     int err;
     int sub_err;
+    /**
+     * references to the data block; 
+     * increamented everytime we build a tensor from the same data block
+     */
+    
+    int* ref; 
 } tensor_meta;
 
 typedef struct {
@@ -59,16 +68,6 @@ typedef struct {
 
 
 void meta_stride(int* shape, int* strides, int dim);
-
-/**
- * get shape of a tensor
- */
-int* tensor_shape(tensor t);
-
-/**
- * get the stride of a tensor
- */
-int* tensor_stride(tensor t);
 
 /**
  * transopose two dimensions
@@ -96,11 +95,12 @@ void tensor_print_data(tensor t);
  * @param dim: dimension
  * @param shape: shape of tensor int[dim]
  * @param e_size: size of a single element (use sizeof)
+ * @param pr: a pointer to other tensor to share data block. Keep ref count (only safe way to share)
  * @param data: a data block from other tensor if you don't want new mem allocated 
  * 
  * 
  */
-tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data);
+tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data);
 
 /**
  * frees every memory held by a tensor

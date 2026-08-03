@@ -1,5 +1,5 @@
 
-#include  "libtensor.h"
+#include  "cten.h"
 
 #ifdef OMP
 #include <omp.h>
@@ -27,7 +27,7 @@ void tensor_print_data(tensor t){
 }
 
 
-tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
+tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data){
     
     tensor t;
 
@@ -44,18 +44,18 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
 
     int meta_size = sizeof(int) * dim;
     
-    void* meta = malloc(meta_size * 3);
+    void* meta = malloc(meta_size * 3 + sizeof(int));
     if(!meta){
         ERROR(MEM_ERR, MALLOC_ERR, t)
     }
+    
+    //build the meta block    
+    memcpy(meta, shape, meta_size);
     t.meta.shape = meta;
-    memcpy(t.meta.shape, shape, meta_size);
-
-    
-    
-    
     t.meta.stride = meta + meta_size;
-    t.meta.__stride = meta + 2 * meta_size;
+    t.meta.__stride = t.meta.stride + dim;
+    t.meta.ref   = t.meta.__stride + dim;
+
     
     t.meta.stride[0] = 1;
     for (int8 d = 1; d < dim; d++)
@@ -64,7 +64,14 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
 
     memcpy(t.meta.__stride, t.meta.stride, meta_size);
     
-    if(data){
+    if(pr){
+        //create from other tensor
+        *(pr->meta.ref) += 1;
+        t.meta.ref = pr->meta.ref;
+        printf("%p %p %d \n", pr->meta.ref, t.meta.ref, t.meta.__stride - t.meta.ref);
+        t.data = pr->data;
+    }else if(data){
+        //create from void* data
         t.data = data;
     }else{
         t.data = malloc(size * e_size);
@@ -79,12 +86,15 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, void* data){
 
 
 void tensor_free(tensor t){
+    if(!tensor_isshared(t))
+        free(t.data);
+    else
+        *(t.meta.ref ) -= 1;
     meta_free(&t.meta);
-    free(t.data);
 }
 
 tensor tensor_clone(tensor t){
-    return  tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, t.data);
+    return  tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, &t, NULL);
 }
 
 
@@ -96,7 +106,7 @@ tensor tensor_copy(tensor t){
 
 tensor tensor_contiguous(tensor t){
     
-    tensor t1 = tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, NULL);
+    tensor t1 = tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, NULL, NULL);
     tensor_meta m1 = t1.meta;
 
 #ifdef OMP
@@ -150,7 +160,7 @@ tensor tensor_view(tensor t, int* shape, int dim){
         ERROR(OP_ERR, CONTG_ERR, t)
     }
     
-    return tensor_build(dim, shape, t.meta.e_size, t.data);
+    return tensor_build(dim, shape, t.meta.e_size, &t, NULL);
     
 }
 
@@ -187,14 +197,14 @@ tensor tensor_repeat(tensor t, int* repeat){
 
     
 
-    tensor temp = tensor_build(temp_dim, shape, t.meta.e_size, t.data);
+    tensor temp = tensor_build(temp_dim, shape, t.meta.e_size, &t, NULL);
 
     temp.meta.stride = strides;
     temp.meta.shape = shape;
     
     temp = tensor_contiguous(temp);
 
-    tensor res = tensor_build(t.meta.dim, new_shape, t.meta.e_size, temp.data);
+    tensor res = tensor_build(t.meta.dim, new_shape, t.meta.e_size, &temp, NULL);
 
     meta_free(&temp.meta);
 
@@ -225,7 +235,7 @@ tensor tensor_broadcast(tensor t, int* shape, int dim){
         new_shape[d] = shape[d];
     }
     
-    tensor res = tensor_build(dim, new_shape, t.meta.e_size, t.data);
+    tensor res = tensor_build(dim, new_shape, t.meta.e_size, &t, NULL);
     
     memcpy(res.meta.stride, new_stride, dim * sizeof(int));
 
