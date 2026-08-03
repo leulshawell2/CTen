@@ -19,7 +19,7 @@ int main(){
     shape[1] = 1;
     shape[2] = 1;
     // tensor t2 = tensor_view(t, shape, 2);
-    uint8 dims[3] = {1, 0, 2};
+    uint8 dims[3] = {1, 2, 0};
     tensor t2 = tensor_permute(t, dims);
     tensor t4 = tensor_transpose(t, 0, 1);
 
