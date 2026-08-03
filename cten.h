@@ -33,6 +33,7 @@
 
 //some helpers i don't want to be function calls
 #define tensor_isshared(t)  *((t).meta.ref) != 0
+#define tensor_fromother(t) tensor_build((t).meta.dim, (t).meta.shape, (t).meta.e_size, &t, NULL)
 
                         
 
@@ -73,7 +74,13 @@ void meta_stride(int* shape, int* strides, int dim);
  * transopose two dimensions
  * doesn't do copy just shape and stride changes
  */
-void tensor_transpose(tensor t, uint8 dim1, uint8 dim2);
+tensor tensor_transpose(tensor t, uint8 dim1, uint8 dim2);
+
+/**
+ * permute dims. Unlike transpose this can permute any number of dims
+ * @param dims has to be of length t.meta.dim
+ */
+tensor tensor_permute(tensor t, uint8* dims);
 
 /**
  * element count of the tensor
@@ -92,11 +99,11 @@ void tensor_print_data(tensor t);
 
 /**
  * build tensor & dim
- * @param dim: dimension
- * @param shape: shape of tensor int[dim]
- * @param e_size: size of a single element (use sizeof)
- * @param pr: a pointer to other tensor to share data block. Keep ref count (only safe way to share)
- * @param data: a data block from other tensor if you don't want new mem allocated 
+ * @param dim dimension
+ * @param shape shape of tensor int[dim]
+ * @param e_size size of a single element (use sizeof)
+ * @param pr a pointer to other tensor to share data block. Keep ref count (only safe way to share)
+ * @param data a buffer if you already have. Don't share other tensors like this. Use the pr param.
  * 
  * 
  */

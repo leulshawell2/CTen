@@ -12,9 +12,9 @@
 void tensor_print_data(tensor t){
     tensor_meta m = t.meta;
     
-    printf("\n");
     for (uint i = 0; i < m.size; i++) {
         int i1 = 0;
+
 
         for(uint8 d=0; d < m.dim; d++){
             int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
@@ -25,6 +25,8 @@ void tensor_print_data(tensor t){
     printf("\n");
 
 }
+
+
 
 
 tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data){
@@ -68,7 +70,6 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data)
         //create from other tensor
         *(pr->meta.ref) += 1;
         t.meta.ref = pr->meta.ref;
-        printf("%p %p %d \n", pr->meta.ref, t.meta.ref, t.meta.__stride - t.meta.ref);
         t.data = pr->data;
     }else if(data){
         //create from void* data
@@ -86,10 +87,10 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data)
 
 
 void tensor_free(tensor t){
-    if(!tensor_isshared(t))
-        free(t.data);
-    else
+    if(tensor_isshared(t))
         *(t.meta.ref ) -= 1;
+    else
+        free(t.data);
     meta_free(&t.meta);
 }
 
@@ -222,7 +223,7 @@ tensor tensor_broadcast(tensor t, int* shape, int dim){
     for(int d=0; d < dim; d++){
         if(d < t.meta.dim){
             if(shape[d] != t.meta.shape[d]){
-                if(t.meta.shape[d] != 1){
+                if(t.meta.shape[d] != 1 && shape[d] != 1){
                     ERROR(OP_ERR, DIM_ERR, t)
                 }
                 new_stride[d] = 0;
@@ -232,7 +233,7 @@ tensor tensor_broadcast(tensor t, int* shape, int dim){
         }else {
             new_stride[d] = 0;
         }
-        new_shape[d] = shape[d];
+        new_shape[d] = shape[d] != 1? shape[d]: t.meta.shape[d];
     }
     
     tensor res = tensor_build(dim, new_shape, t.meta.e_size, &t, NULL);

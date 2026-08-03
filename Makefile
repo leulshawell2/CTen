@@ -3,7 +3,7 @@ CC = gcc
 SRC = tensor.c meta.c
 SHARED_LIB = libcten
 
-main: ${TARGETS}
+main: ${TARGETS} main.o
 	${CC}   -fopenmp ${TARGETS} main.o -o main
 
 

@@ -88,15 +88,64 @@ void tensor_shape_copy(tensor t1, int* shape){
 
 
 
-void tensor_transpose(tensor t, uint8 dim1, uint8 dim2){
+tensor tensor_transpose(tensor t, uint8 dim1, uint8 dim2){
     tensor_meta m = t.meta;
 
-    int temp = m.shape[dim1];
-    m.shape[dim1] = m.shape[dim2];
-    m.shape[dim2] = temp;
+    int new_shape[m.dim];
+
+    memcpy(new_shape, m.shape, m.dim * sizeof(int));
+
+    int temp = new_shape[dim1];
+    new_shape[dim1] = new_shape[dim2];
+    new_shape[dim2] = temp;
+    
+    
+    tensor res = tensor_build(m.dim, new_shape, m.e_size, &t, NULL);
+
+    memcpy(res.meta.stride, m.stride, m.dim * sizeof(int));
 
     temp = m.stride[dim1];
-    m.stride[dim1] = m.stride[dim2];
-    m.stride[dim2] = temp;
+    res.meta.stride[dim1] = res.meta.stride[dim2];
+    res.meta.stride[dim2] = temp;
+
+
+    return res;
 
 }
+
+
+tensor tensor_permute(tensor t, uint8* dims){
+    tensor_meta m = t.meta;
+
+    int new_shape[m.dim];
+
+    memcpy(new_shape, m.shape, m.dim * sizeof(int));
+    int temp;
+    int d2;
+    for(uint8 d=0; d < t.meta.dim; d++){
+        d2 = dims[d];
+        temp = new_shape[d];
+        new_shape[d] = new_shape[d2];
+        new_shape[d2] = temp;
+    }
+    
+    
+    tensor res = tensor_build(m.dim, new_shape, m.e_size, &t, NULL);
+
+    memcpy(res.meta.stride, m.stride, m.dim * sizeof(int));
+
+    for(uint8 d=0; d < t.meta.dim; d++){
+        d2 = dims[d];
+        temp = m.stride[d];
+        res.meta.stride[d] = res.meta.stride[d2];
+        res.meta.stride[d2] = temp;
+    }
+
+
+
+    return res;
+
+}
+
+
+
