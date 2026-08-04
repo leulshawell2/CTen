@@ -1,6 +1,7 @@
 
 #include  "cten.h"
 
+
 #ifdef OMP
 #include <omp.h>
 #endif
@@ -59,7 +60,7 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data)
     t.meta.ref   = t.meta.__stride + dim;
 
     
-    t.meta.stride[0] = 1;
+    t.meta.stride[0] = shape[0] != 0? 1: 0;
     for (int8 d = 1; d < dim; d++)
         t.meta.stride[d] = shape[d-1] * t.meta.stride[d-1];
 
@@ -91,7 +92,7 @@ void tensor_free(tensor t){
         *(t.meta.ref ) -= 1;
     else
         free(t.data);
-    meta_free(&t.meta);
+    free(t.meta.shape);
 }
 
 tensor tensor_clone(tensor t){
@@ -110,36 +111,36 @@ tensor tensor_contiguous(tensor t){
     tensor t1 = tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, NULL, NULL);
     tensor_meta m1 = t1.meta;
 
-#ifdef OMP
-    #pragma omp parallel
-    {
-        int nthreads = omp_get_num_threads();
-        int tid = omp_get_thread_num();
+    #ifdef OMP
+        #pragma omp parallel
+        {
+            int nthreads = omp_get_num_threads();
+            int tid = omp_get_thread_num();
 
-        int w_ = (m1.size + nthreads-1) / nthreads;
-        int start  = tid * w_;
-        int end = start + w_;
-        if (end > m1.size){
-            end = m1.size;
-        }
-#else
-        int start = 0;
-        int end = m1.size;
-#endif
-        for (int i = start; i < end; i++) {
-            int i1 = 0;
-            for(uint8 d=0; d < m1.dim; d++){
-                int coord = GET_MIXED_RADIX_DIGIT(i, d, m1.__stride, m1.shape);
-                i1 += (coord * t.meta.stride[d]);
+            int w_ = (m1.size + nthreads-1) / nthreads;
+            int start  = tid * w_;
+            int end = start + w_;
+            if (end > m1.size){
+                end = m1.size;
             }
-            void* des_pos = t1.data + m1.e_size * i;
-            void* src_pos = t.data + m1.e_size * i1;
-            memcpy(des_pos, src_pos, m1.e_size);
+            for (int i = start; i < end; i++) {
 
-            // ((float*)t1.data)[i] = ((float*)t.data)[i1];
+    #else
+            for (int i = 0; i < m1.size; i++) {
+    #endif
+                int i1 = 0;
+                for(uint8 d=0; d < m1.dim; d++){
+                    int coord = GET_MIXED_RADIX_DIGIT(i, d, m1.__stride, m1.shape);
+                    i1 += (coord * t.meta.stride[d]);
+                }
+                void* des_pos = t1.data + m1.e_size * i;
+                void* src_pos = t.data + m1.e_size * i1;
+                memcpy(des_pos, src_pos, m1.e_size);
+
+                // ((float*)t1.data)[i] = ((float*)t.data)[i1];
+            }
+    #ifdef OMP
         }
-#ifdef OMP
-    }
 #endif
 
     return t1;
@@ -175,7 +176,7 @@ tensor tensor_reshape(tensor t, int* shape, int dim){
 
     tensor temp = tensor_contiguous(t);
     tensor res = tensor_view(temp, shape, dim);
-    meta_free(&temp.meta);
+    tensor_free(temp);
 
     return res;
 }
@@ -211,7 +212,7 @@ tensor tensor_repeat(tensor t, int* repeat){
 
     tensor res = tensor_build(t.meta.dim, new_shape, t.meta.e_size, &temp, NULL);
 
-    meta_free(&temp.meta);
+    tensor_free(temp);
 
     return res;
 
@@ -245,4 +246,31 @@ tensor tensor_broadcast(tensor t, int* shape, int dim){
     memcpy(res.meta.stride, new_stride, dim * sizeof(int));
 
     return res;
+}
+
+
+tensor tensor_index(tensor t, int* idxs){
+    int new_shape[t.meta.dim];
+    int offset = 0;
+
+    for(int d=0; d < t.meta.dim * 2;  d+=2 ){
+        int s = idxs[d];
+        int e = idxs[d + 1];
+        
+        new_shape[d/2] = e - s;
+
+        offset += t.meta.stride[d/2] * s;
+    }
+
+    tensor temp = tensor_build(t.meta.dim, new_shape, t.meta.e_size, &t, NULL);
+    memcpy(temp.meta.stride, t.meta.stride, t.meta.dim * sizeof(int));
+
+    temp.data += offset * temp.meta.e_size;
+
+    tensor res = tensor_contiguous(temp);
+
+    tensor_free(temp);
+
+    return res;
+
 }

@@ -5,7 +5,6 @@
 
 
 void meta_free(tensor_meta* meta){
-    /**the meta data memory starts at shape so we free that  */
     free(meta->shape);
 }
 

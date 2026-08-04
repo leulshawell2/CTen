@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define OMP
 
 
 // Column-Major: Left digit (n=0) varies fastest
@@ -168,6 +167,11 @@ int meta_size(int* shape, uint8 dim);
  * calculates new strides and compares with the current
  */
 boolean tensor_iscontiguous(tensor t);
+
+/**
+ * index a tensor
+*/
+tensor tensor_index(tensor t, int* idxs);
 
 /**
  * Set the all properties of a tenor meta

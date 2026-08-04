@@ -1,6 +1,6 @@
 TARGETS = tensor.o meta.o
 CC = gcc
-SRC = tensor.c meta.c
+SRC = tensor.c meta.c 
 SHARED_LIB = libcten
 
 main: ${TARGETS} main.o
@@ -11,7 +11,7 @@ main.o: main.c
 	gcc -c main.c -o  main.o
 
 ${TARGETS}:  ${SRC}
-	gcc -c  main.c  tensor.c meta.c
+	gcc -c  -fopenmp main.c  tensor.c meta.c
 
 
 ${SHARED_LIB}:  ${SRC}
