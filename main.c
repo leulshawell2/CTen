@@ -12,7 +12,7 @@ int main(){
 
 
 
-    int idxs[4] = {0, 1,  1, 2};
+    int idxs[6] = {0, 3, 2,  0, 3, 1};
 
     tensor t2 = tensor_index(t, idxs);
 

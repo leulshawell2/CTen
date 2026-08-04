@@ -252,25 +252,31 @@ tensor tensor_broadcast(tensor t, int* shape, int dim){
 tensor tensor_index(tensor t, int* idxs){
     int new_shape[t.meta.dim];
     int offset = 0;
+    int new_strides[t.meta.dim];
 
-    for(int d=0; d < t.meta.dim * 2;  d+=2 ){
+    for(int d=0; d < t.meta.dim * 3;  d+=3 ){
         int s = idxs[d];
         int e = idxs[d + 1];
-        
-        new_shape[d/2] = e - s;
+        int j = idxs[d+2];
 
-        offset += t.meta.stride[d/2] * s;
+        int d_3 = d/3;
+        
+        new_shape[d_3] = MAX(0, (e - s - 1)/ j + 1);
+        new_strides[d_3] = j * t.meta.stride[d_3];
+
+        offset += t.meta.stride[d_3] * s;
     }
 
     tensor temp = tensor_build(t.meta.dim, new_shape, t.meta.e_size, &t, NULL);
-    memcpy(temp.meta.stride, t.meta.stride, t.meta.dim * sizeof(int));
+    memcpy(temp.meta.stride, new_strides, t.meta.dim * sizeof(int));
 
     temp.data += offset * temp.meta.e_size;
 
+    
     tensor res = tensor_contiguous(temp);
-
+    
     tensor_free(temp);
-
+    
     return res;
 
 }
