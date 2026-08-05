@@ -11,11 +11,11 @@ main.o: main.c
 	gcc -c main.c -o  main.o
 
 ${TARGETS}:  ${SRC}
-	gcc -c  -fopenmp main.c ${SRC}
+	gcc -c ${SRC}
 
 
 ${SHARED_LIB}:  ${SRC}
-	gcc -shared -fopenmp ${SRC} -o ${SHARED_LIB}.so
+	gcc -shared  ${SRC} -o ${SHARED_LIB}.so
 
 
 

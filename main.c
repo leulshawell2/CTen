@@ -2,6 +2,8 @@
 
 
 
+
+
 tensor contiguous_handler(context* ctx, op_args args){
     return tensor_contiguous(*(tensor*)args);
 }
@@ -12,6 +14,7 @@ tensor index_handler(context* ctx, op_args args){
     int* idxs = *((int**)(args + sizeof(tensor*)));
     return tensor_index(t, idxs);
 }
+
 
 
 

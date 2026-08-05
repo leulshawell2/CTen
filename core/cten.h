@@ -121,7 +121,7 @@ void tensor_free(tensor t);
  * if called on a an already contiguous tensor it will return back the same tensor.
  * so no new mem will be allocated if already contiguous
  */
-tensor tensor_contiguous(tensor t);
+extern tensor tensor_contiguous(tensor t);
 
 /**
  * does bioligy clone. Every DNS copied
