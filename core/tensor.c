@@ -15,8 +15,6 @@ void tensor_print_data(tensor t){
     
     for (uint i = 0; i < m.size; i++) {
         int i1 = 0;
-
-
         for(uint8 d=0; d < m.dim; d++){
             int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
             i1 += (coord * m.stride[d]);
@@ -34,23 +32,24 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data)
     
     tensor t;
 
+    
     t.meta.err = 0;
     t.meta.sub_err = 0;
     t.meta.dim = dim;
     t.meta.e_size = e_size;
-
+    
     int size = 1;
     for(uint8 d=0; d < dim; d++) 
         size = size * shape[d];
     t.meta.size = size;
-
-
-    int meta_size = sizeof(int) * dim;
     
-    void* meta = malloc(meta_size * 3 + sizeof(int));
+    
+    int meta_size = sizeof(int) * dim;
+    void* meta = meta_alloc(dim);
     if(!meta){
         ERROR(MEM_ERR, MALLOC_ERR, t)
     }
+    
     
     //build the meta block    
     memcpy(meta, shape, meta_size);
@@ -59,7 +58,6 @@ tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data)
     t.meta.__stride = t.meta.stride + dim;
     t.meta.ref   = t.meta.__stride + dim;
 
-    
     t.meta.stride[0] = shape[0] != 0? 1: 0;
     for (int8 d = 1; d < dim; d++)
         t.meta.stride[d] = shape[d-1] * t.meta.stride[d-1];
@@ -96,7 +94,32 @@ void tensor_free(tensor t){
 }
 
 tensor tensor_clone(tensor t){
-    return  tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, &t, NULL);
+    tensor res;
+    //copy all the meta in a single memcpy call
+    res.meta.shape = meta_alloc(t.meta.dim);
+
+    if(!res.meta.shape){
+        ERROR(MEM_ERR, MALLOC_ERR, t);
+    }
+
+    res.meta.dim = t.meta.dim;
+    res.meta.e_size = t.meta.e_size;
+    res.meta.size = t.meta.size;
+    res.meta.sub_err = 0;
+    res.meta.err = 0;
+    res.meta.stride = res.meta.shape + res.meta.dim;
+    res.meta.__stride = res.meta.stride + res.meta.dim;
+    res.meta.ref   = t.meta.__stride + res.meta.dim; 
+    *res.meta.ref = 0;
+    
+    memcpy(res.meta.shape, t.meta.shape, t.meta.dim * sizeof(int) * 3);
+    res.data = malloc(res.meta.size * res.meta.e_size);
+    if(!res.data){
+        ERROR(MEM_ERR, MALLOC_ERR, t);
+    }
+
+    memcpy(res.data, t.data, res.meta.e_size * res.meta.size);
+    return res;
 }
 
 
@@ -107,6 +130,10 @@ tensor tensor_copy(tensor t){
 
 
 tensor tensor_contiguous(tensor t){
+
+    if (tensor_iscontiguous(t)){
+        return t;
+    }
     
     tensor t1 = tensor_build(t.meta.dim, t.meta.shape, t.meta.e_size, NULL, NULL);
     tensor_meta m1 = t1.meta;
@@ -272,7 +299,6 @@ tensor tensor_index(tensor t, int* idxs){
 
     temp.data += offset * temp.meta.e_size;
 
-    
     tensor res = tensor_contiguous(temp);
     
     tensor_free(temp);

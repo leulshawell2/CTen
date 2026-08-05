@@ -8,6 +8,13 @@ void meta_free(tensor_meta* meta){
     free(meta->shape);
 }
 
+
+
+void* meta_alloc(int dim){
+    size_t size = sizeof(int) * dim * 3 + sizeof(int*);
+    return malloc(size);
+}
+
 void meta_stride(int* shape, int* strides, int dim){
     strides[0] = 1;
     for (int8 d = 1; d < dim; d++)
