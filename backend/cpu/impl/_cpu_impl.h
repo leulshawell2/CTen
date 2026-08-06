@@ -1,4 +1,4 @@
-#include "../../cten.h"
+#include "../../../cten.h"
 
 /**
  * does bioligy clone. Every DNS copied

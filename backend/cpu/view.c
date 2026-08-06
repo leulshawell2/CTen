@@ -1,20 +1,8 @@
-#include "view_ops.h"
+/**
+ * these are ops that don't new data block. They just do view ops
+ */
 
-
-void tensor_contiguous(context* ctx, op_args args){
-    tensor* res = EXTRACT_ARG_PTR(tensor*, args);
-    tensor* t = EXTRACT_ARG_PTR(tensor*, args + sizeof(tensor*));
-    _tensor_contiguous(t, res);
-}
-
-
-void tensor_index(context* ctx, op_args args){
-    tensor* res = EXTRACT_ARG_PTR(tensor*, args);
-    tensor* t = EXTRACT_ARG_PTR(tensor*, args+1);
-    int* idxs = *((int**)(args + sizeof(tensor*)));
-    _tensor_index(t, idxs, res);
-}
-
+#include "view.h"
 
 void tensor_transpose(context* ctx, op_args args){
     tensor* res = EXTRACT_ARG_PTR(tensor*, args);

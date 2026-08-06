@@ -1,7 +1,26 @@
-TARGETS = tensor.o meta.o cten.o  view_ops.o _view_ops.o
 CC = gcc
-SRC = ./core/tensor.c ./core/meta.c  ./cten.c ./cpu/view_ops.c ./cpu/impl/_view_ops.c  ./cten.c
 SHARED_LIB = libcten
+
+
+
+TARGETS = tensor.o \
+		meta.o \
+		cten.o  \
+		view.o \
+		_view.o\
+		movement.o \
+		_movement.o
+
+
+SRC = ./core/tensor.c \
+	 ./core/meta.c \
+	 ./cten.c \
+	 ./backend/cpu/view.c \
+	 ./backend/cpu/movement.c \
+	 ./backend/cpu/impl/_view.c \
+	 ./backend/cpu/impl/_movement.c \
+	./cten.c
+
 
 main: ${TARGETS} main.o
 	${CC}   -fopenmp ${TARGETS} main.o -o main

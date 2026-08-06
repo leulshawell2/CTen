@@ -1,7 +1,12 @@
 #include "./core/tensor.h"
 
 
+
+
 #define CT_ERROR(c, sc, ctx)  (ctx)->err = c; (ctx)->sub_err = sc;
+
+
+
 
 
 #define EXTRACT_ARG_PTR(type, args) *((type*)args)
@@ -16,12 +21,20 @@
 
 
 
+
+#define OP_CONTIGUOUS   0
+#define OP_CLONE        1
+#define OP_COPY         2
+#define OP_VIEW         3
+#define OP_RESHAPE      4
+#define OP_REPEAT       5
+#define OP_BROADCAST    6
+#define OP_INDEX        7
+#define OP_TRASPOSE     8
+#define OP_PERMUTE      9
+
 #define BASE_OPS_COUNT 10
 
-#define OP_CONT 0
-#define OP_INDEX 1
-#define OP_COPY 2
-#define OP_CLONE 3
 
 typedef struct context context; 
 
