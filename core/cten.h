@@ -16,7 +16,7 @@
 
 
 //takes code, sub-code, tensor
-#define ERROR(c, sc, t)  (t).meta.err = c; (t).meta.sub_err = sc; return t;
+#define ERROR(c, sc, t)  (t)->meta.err = c; (t)->meta.sub_err = sc;
 
 
 #define OP_ERR  1
@@ -33,8 +33,8 @@
 
 
 //some helpers i don't want to be function calls
-#define tensor_isshared(t)  *((t).meta.ref) != 0
-#define tensor_fromother(t) tensor_build((t).meta.dim, (t).meta.shape, (t).meta.e_size, &t, NULL)
+#define tensor_isshared(t)  *((t)->meta.ref) != 0
+#define tensor_fromother(t) tensor_build((t)->meta.dim, (t)->meta.shape, (t)->meta.e_size, &t, NULL)
 
                         
 
@@ -75,28 +75,28 @@ void meta_stride(int* shape, int* strides, int dim);
  * transopose two dimensions
  * doesn't do copy just shape and stride changes
  */
-tensor tensor_transpose(tensor t, uint8 dim1, uint8 dim2);
+void tensor_transpose(tensor* t, uint8 dim1, uint8 dim2, tensor* res);
 
 /**
  * permute dims. Unlike transpose this can permute any number of dims
  * @param dims has to be of length t.meta.dim
  */
-tensor tensor_permute(tensor t, uint8* dims);
+void tensor_permute(tensor* t, uint8* dims, tensor* res);
 
 /**
  * element count of the tensor
  */
-int tensor_size(tensor t);
+int tensor_size(tensor* t);
 
 /**
  * prints meta data of tensor
  */
-void tensor_print_meta(tensor t);
+void tensor_print_meta(tensor* t);
 
 /**
  * prints the data block of a tensor
  */
-void tensor_print_data(tensor t);
+void tensor_print_data(tensor* t);
 
 /**
  * build tensor & dim
@@ -108,12 +108,12 @@ void tensor_print_data(tensor t);
  * 
  * 
  */
-tensor tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data);
+void tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data, tensor* res);
 
 /**
  * frees every memory held by a tensor
  */
-void tensor_free(tensor t);
+void tensor_free(tensor* t);
 
 
 /**
@@ -121,19 +121,19 @@ void tensor_free(tensor t);
  * if called on a an already contiguous tensor it will return back the same tensor.
  * so no new mem will be allocated if already contiguous
  */
-extern tensor tensor_contiguous(tensor t);
+void tensor_contiguous(tensor* t, tensor* res);
 
 /**
  * does bioligy clone. Every DNS copied
  * new memory, but every other property of input tensor is cloned
  */
-tensor tensor_clone(tensor t);
+void tensor_clone(tensor* t, tensor* res);
 
 /**
  * creates a new tensor (exact but contiguous copy) 
  * it is a call to contiguous
  */
-tensor tensor_copy(tensor t);
+void tensor_copy(tensor* t, tensor* res);
 
 
 void tensor_shape_copy(tensor t, int* buff);
@@ -142,37 +142,41 @@ void tensor_shape_copy(tensor t, int* buff);
  * allows viewing a tensor with different shape
  * required contuguous and return non-contiguous (No copy)
  */
-tensor tensor_view(tensor t, int* shape, int dim);
+void tensor_view(tensor* t, int* shape, int dim, tensor* res);
 
 
 /**
  * same as view but first calls contiguous if tensor is not contiguous
  */
-tensor tensor_reshape(tensor t, int* shape, int dim);
+void tensor_reshape(tensor* t, int* shape, int dim, tensor* res);
 
 /**
  * takes a repeat array and repeats every dimention awith that number
  * {2, 3, 4} means repeat dim 0 twice, dim 1 3 times and dim 2 4 time
  * returns contiguous memory
  */
-tensor tensor_repeat(tensor t, int* repeat);
+void tensor_repeat(tensor* t, int* repeat, tensor* res);
 
 /**
  * broadcast and tensor for ops. add new dimas and expand dim sizes of 1
  */
-tensor tensor_broadcast(tensor t, int* shape, int dim);
+void tensor_broadcast(tensor* t, int* shape, int dim, tensor* res);
 
 
 /**
  * check if a tensor is contiguous.
  * calculates new strides and compares with the current
  */
-boolean tensor_iscontiguous(tensor t);
+boolean tensor_iscontiguous(tensor* t);
 
 /**
  * index a tensor
 */
-tensor tensor_index(tensor t, int* idxs);
+void tensor_index(tensor* t, int* idxs, tensor* res);
+/**
+ * clone the meta of a tensor. all pointers taken
+ */
+void tensor_meta_clone(tensor* dest, tensor* src);
 
 /**
  * Set the all properties of a tenor meta
@@ -198,3 +202,4 @@ void meta_print(tensor_meta* meta);
  * free meta data memory (the shape, stride and __stride)
  */
 void meta_free(tensor_meta *meta);
+

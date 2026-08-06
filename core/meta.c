@@ -66,81 +66,31 @@ void meta_print(tensor_meta* meta){
 }
 
 
-void tensor_print_meta(tensor t){
-        printf("Addr=%p ", t.data);
-        meta_print(&t.meta);
+void tensor_print_meta(tensor* t){
+        printf("Addr=%p ", t->data);
+        meta_print(&t->meta);
 
 }
 
 
 
-boolean tensor_iscontiguous(tensor t){
-    return _array_equal(t.meta.stride, t.meta.__stride, t.meta.dim);
+boolean tensor_iscontiguous(tensor* t){
+    return _array_equal(t->meta.stride, t->meta.__stride, t->meta.dim);
 }
 
 
-int tensor_size(tensor t){
-    return meta_size(t.meta.shape, t.meta.dim);
-}
-
-
-void tensor_shape_copy(tensor t1, int* shape){
-
-    for(int d=0; d < t1.meta.dim; d++){
-        shape[d] = t1.meta.shape[d];
-    }
-
+int tensor_size(tensor* t){
+    return meta_size(t->meta.shape, t->meta.dim);
 }
 
 
 
-tensor tensor_transpose(tensor t, uint8 dim1, uint8 dim2){
-    tensor_meta m = t.meta;
 
-    int new_shape[m.dim];
-
-    memcpy(new_shape, m.shape, m.dim * sizeof(int));
-
-    int temp = new_shape[dim1];
-    new_shape[dim1] = new_shape[dim2];
-    new_shape[dim2] = temp;
-    
-    
-    tensor res = tensor_build(m.dim, new_shape, m.e_size, &t, NULL);
-
-    memcpy(res.meta.stride, m.stride, m.dim * sizeof(int));
-
-    temp = m.stride[dim1];
-    res.meta.stride[dim1] = res.meta.stride[dim2];
-    res.meta.stride[dim2] = temp;
-
-
-    return res;
-
+void tensor_meta_clone(tensor* dest, tensor* src){
+    dest->meta.dim = src->meta.dim;
+    dest->meta.e_size = src->meta.e_size;
+    dest->meta.size = src->meta.size;
+    dest->meta.sub_err = src->meta.sub_err;
+    dest->meta.err = src->meta.err;
+    memcpy(dest->meta.shape, dest->meta.shape, sizeof(int) * src->meta.dim * 3 + sizeof(int*));
 }
-
-
-tensor tensor_permute(tensor t, uint8* dims){
-    tensor_meta m = t.meta;
-
-    int new_shape[m.dim];
-    int new_strides[m.dim];
-    int temp = 0;
-    int d2;
-
-    memcpy(new_shape, m.shape, m.dim * sizeof(int));
-    for(uint8 d=0; d < t.meta.dim; d++){
-        d2 = dims[d];
-        new_shape[d] = m.shape[d2];
-        new_strides[d] = m.stride[d2];
-    }
-    
-    tensor res = tensor_build(m.dim, new_shape, m.e_size, &t, NULL);
-    memcpy(res.meta.stride, new_strides, m.dim * sizeof(int));
-
-    return res;
-
-}
-
-
-

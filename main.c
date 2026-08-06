@@ -1,56 +1,66 @@
+#define OMP
 #include "cten.h"
 
 
 
-
-
-tensor contiguous_handler(context* ctx, op_args args){
-    return tensor_contiguous(*(tensor*)args);
+tensor contiguous_handler(context* ctx, op_args args, tensor* res){
+    tensor_contiguous((tensor*)args, res);
 }
 
 
-tensor index_handler(context* ctx, op_args args){
-    tensor t = (*(tensor**)args)[0];
+tensor index_handler(context* ctx, op_args args, tensor* res){
+    tensor* t = EXTRACT_ARG_PTR(tensor, args);
     int* idxs = *((int**)(args + sizeof(tensor*)));
-    return tensor_index(t, idxs);
+    tensor_index(t, idxs, res);
 }
+
+
+tensor trans_handler(context* ctx, op_args args, tensor* res){
+    tensor* t = EXTRACT_ARG_PTR(tensor, args);
+    int* idxs = *((int**)(args + sizeof(tensor*)));
+    tensor_transpose(t, idxs[0], idxs[1], res);
+}
+
+
+
+tensor permute_handler(context* ctx, op_args args, tensor* res){
+    tensor* t = EXTRACT_ARG_PTR(tensor, args);
+    uint8* idxs = *((uint8**)(args + sizeof(tensor*)));
+    tensor_permute(t, idxs, res);
+}
+
 
 
 
 
 
 int main(){
+
+    int nthreads = omp_get_num_threads();
+
+    printf("OMP using %d threads\n", nthreads);
+
+    context* cpu_ctx = CT_context_init(2);
+    CT_register_op(cpu_ctx, OP_CONT, contiguous_handler);
+    CT_register_op(cpu_ctx, OP_INDEX, index_handler);
     
-
-    context* ctx = CT_context_init(2);
-    CT_register_op(ctx, OP_CONT, contiguous_handler);
-    CT_register_op(ctx, OP_INDEX, index_handler);
     
+    int shape[3] = {3, 4, 2};
+    tensor t ;
+    tensor t1;
+    tensor t2;
+
+    tensor_build(3, shape, sizeof(float), NULL, NULL, &t);
+
     
-    int shape[2] = {3, 4};
-    tensor t = tensor_build(2, shape, sizeof(float), NULL, NULL);
+    for(int i=0; i < t.meta.size; i++){
+        ((float*)t.data)[i] = i;
+    }
+    uint8 repeat[3] = {1, 0, 2};
 
-
-    op_args index_args = malloc(sizeof(tensor*) + sizeof(int*));
-    ((tensor**) index_args)[0] = &t;
-
-    int idxs[6] = {0, 2, 1,   0, 2, 1};
-    ((int**)(index_args + sizeof(tensor*)))[0] = idxs;
-    
-
-    // op cont_op = {
-    //     .args=&t, .op_id = OP_CONT, .next = NULL, .prev = NULL
-
-    // };
-
-    // op index_op = {.args=index_args,.op_id=OP_INDEX,.next = &cont_op,.prev = NULL };
-
-    tensor t2 =    index_handler(ctx, index_args);
-    tensor t3 = contiguous_handler(ctx, &t2);
-    
-    tensor_print_meta(t);
-    tensor_print_meta(t2);
-    tensor_print_meta(t3);
+    tensor_clone(&t, &t1);
+    tensor_print_data(&t);
+    tensor_print_data(&t1);
 
     return 0;
 
