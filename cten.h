@@ -1,7 +1,4 @@
-#include "./core/cten.h"
-#ifdef OMP
-#include <omp.h>
-#endif
+#include "./core/tensor.h"
 
 
 #define CT_ERROR(c, sc, ctx)  (ctx)->err = c; (ctx)->sub_err = sc;
@@ -29,7 +26,7 @@
 typedef struct context context; 
 
 typedef void* op_args;
-typedef tensor(*op_handler)(context*, op_args, tensor* res);
+typedef void(*op_handler)(context*, op_args, tensor* res);
 
 typedef struct{
     void* args;
@@ -40,7 +37,7 @@ typedef struct{
 
 struct context{
 
-    size_t mem_usage;
+    int mem_usage;
     int tensor_count;
     int err;
     int sub_err;
@@ -56,5 +53,14 @@ struct context{
  * holds the entire program context
  */
 context* CT_context_init(int op_count);
+
+/**
+ * register an op. Ids  are used as indexes in a table
+ */
+
 void  CT_register_op(context* ctx, int op_id, op_handler handler);
+
+/**
+ * replace an op in the table
+ */
 void  CT_replace_op(context* ctx, int op_id, op_handler handler);

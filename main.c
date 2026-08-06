@@ -1,51 +1,18 @@
 #define OMP
-#include "cten.h"
 
 
-
-tensor contiguous_handler(context* ctx, op_args args, tensor* res){
-    tensor_contiguous((tensor*)args, res);
-}
-
-
-tensor index_handler(context* ctx, op_args args, tensor* res){
-    tensor* t = EXTRACT_ARG_PTR(tensor, args);
-    int* idxs = *((int**)(args + sizeof(tensor*)));
-    tensor_index(t, idxs, res);
-}
-
-
-tensor trans_handler(context* ctx, op_args args, tensor* res){
-    tensor* t = EXTRACT_ARG_PTR(tensor, args);
-    int* idxs = *((int**)(args + sizeof(tensor*)));
-    tensor_transpose(t, idxs[0], idxs[1], res);
-}
-
-
-
-tensor permute_handler(context* ctx, op_args args, tensor* res){
-    tensor* t = EXTRACT_ARG_PTR(tensor, args);
-    uint8* idxs = *((uint8**)(args + sizeof(tensor*)));
-    tensor_permute(t, idxs, res);
-}
-
-
-
+#include "./cpu/view_ops.h"
 
 
 
 int main(){
 
-    int nthreads = omp_get_num_threads();
-
-    printf("OMP using %d threads\n", nthreads);
-
     context* cpu_ctx = CT_context_init(2);
-    CT_register_op(cpu_ctx, OP_CONT, contiguous_handler);
-    CT_register_op(cpu_ctx, OP_INDEX, index_handler);
+    CT_register_op(cpu_ctx, OP_CONT, tensor_contiguous);
+    CT_register_op(cpu_ctx, OP_INDEX, tensor_index);
     
     
-    int shape[3] = {3, 4, 2};
+    int shape[3] = {3, 4, 1};
     tensor t ;
     tensor t1;
     tensor t2;
@@ -56,10 +23,11 @@ int main(){
     for(int i=0; i < t.meta.size; i++){
         ((float*)t.data)[i] = i;
     }
-    uint8 repeat[3] = {1, 0, 2};
+    int repeat[3] = {1, 1, 2};
 
-    tensor_clone(&t, &t1);
+    _tensor_repeat(&t, repeat, &t1);
     tensor_print_data(&t);
+    printf("\n");
     tensor_print_data(&t1);
 
     return 0;

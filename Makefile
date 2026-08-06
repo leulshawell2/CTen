@@ -1,6 +1,6 @@
-TARGETS = tensor.o meta.o cten.o
+TARGETS = tensor.o meta.o cten.o  view_ops.o _view_ops.o
 CC = gcc
-SRC = ./core/tensor.c ./core/meta.c  ./cten.c
+SRC = ./core/tensor.c ./core/meta.c  ./cten.c ./cpu/view_ops.c ./cpu/impl/_view_ops.c  ./cten.c
 SHARED_LIB = libcten
 
 main: ${TARGETS} main.o
