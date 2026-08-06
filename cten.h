@@ -6,6 +6,8 @@
 #define CT_ERROR(c, sc, ctx)  (ctx)->err = c; (ctx)->sub_err = sc;
 
 
+#define EXTRACT_ARG_PTR(type, args) (*((type**)args))
+
 //define some major and sub errors for the api
 //major errors
 #define OP_REG_ERR    MAJOR_ERR_END + 1
@@ -26,7 +28,7 @@
 typedef struct context context; 
 
 typedef void* op_args;
-typedef tensor(*op_handler)(context*, op_args);
+typedef tensor(*op_handler)(context*, op_args, tensor* res);
 
 typedef struct{
     void* args;
