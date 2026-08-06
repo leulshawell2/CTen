@@ -8,10 +8,12 @@ void tensor_print_data(tensor* t){
     
     for (uint i = 0; i < m.size; i++) {
         int i1 = 0;
+        
         for(uint8 d=0; d < m.dim; d++){
             int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
             i1 += (coord * m.stride[d]);
         }
+
         printf("%f,\t", ((float*)t->data)[i1]);
     }
     printf("\n");
@@ -48,9 +50,9 @@ void tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data, t
     res->meta.__stride = res->meta.stride + dim;
     res->meta.ref   = res->meta.__stride + dim;
 
-    res->meta.stride[0] = shape[0] != 0? 1: 0;
-    for (int8 d = 1; d < dim; d++)
-        res->meta.stride[d] = shape[d-1] * res->meta.stride[d-1];
+    res->meta.stride[dim-1] = shape[0] != 0? 1: 0;
+    for (int8 d = dim-2; d > -1; d--)
+        res->meta.stride[d] = shape[d+1] * res->meta.stride[d+1];
 
 
     memcpy(res->meta.__stride, res->meta.stride, meta_size);

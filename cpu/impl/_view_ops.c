@@ -121,34 +121,25 @@ void _tensor_repeat(tensor* t, int* repeat, tensor* res){
 }   
 
 void _tensor_broadcast(tensor* t, int* shape, int dim, tensor* res){
-    if(dim < t->meta.dim){
-        ERROR(OP_ERR, DIM_ERR, t)
-    }
     int new_shape[dim];
     int new_stride[dim];
 
-    for(int d=0; d < dim; d++){
-        if(d < t->meta.dim){
-            if(shape[d] != t->meta.shape[d]){
-                if(t->meta.shape[d] != 1 && shape[d] != 1){
-                    ERROR(OP_ERR, DIM_ERR, t)
-                }
-                new_stride[d] = 0;
-            }else{
-                new_stride[d] = t->meta.stride[d];
-            }
-        }else {
+    int new_dims = dim - t->meta.dim;
+
+    for(int d=0; d < dim; d++ ){
+        if(d < new_dims){
+            new_shape[d] = shape[d];
             new_stride[d] = 0;
+        }else {
+            int d2 = d - new_dims;
+            new_shape[d] = shape[d] == 1? t->meta.shape[d2]: shape[d];
+            new_stride[d] = shape[d] == 1? t->meta.stride[d2]: 0;    
         }
-        new_shape[d] = shape[d] != 1? shape[d]: t->meta.shape[d];
     }
 
-    tensor* temp;
-    tensor_build(dim, new_shape, t->meta.e_size, t, NULL, temp);
-    tensor_meta_clone(res, temp);
-    res->data = temp->data;
-    
+    tensor_build(dim, new_shape, t->meta.e_size, t, NULL, res);
     memcpy(res->meta.stride, new_stride, dim * sizeof(int));
+    
 
 }
 
@@ -158,10 +149,10 @@ void _tensor_index(tensor* t, int* idxs, tensor* res){
     int offset = 0;
     int new_strides[t->meta.dim];
 
-    for(int d=0; d < t->meta.dim * 3;  d+=3 ){
-        int s = idxs[d];
-        int e = idxs[d + 1];
-        int j = idxs[d+2];
+    for(int d=t->meta.dim * 3 - 1; d > 0;  d-=3 ){
+        int s = idxs[d-2];
+        int e = idxs[d-1];
+        int j = idxs[d];
 
         int d_3 = d/3;
         
@@ -181,12 +172,18 @@ void _tensor_index(tensor* t, int* idxs, tensor* res){
     tensor_free(temp);
 }
 
-void _tensor_transpose(tensor* t, uint8 dim1, uint8 dim2, tensor* res){
+
+
+void _tensor_transpose(tensor* t, uint8 _dim1, uint8 _dim2, tensor* res){
     tensor_meta m = t->meta;
+    uint8 dim1 = m.dim - _dim1 - 1;
+    uint8 dim2 = m.dim - _dim2 - 1;
     
     tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
-    res->meta.stride = t->meta.stride;
-    
+    memcpy(res->meta.stride, t->meta.stride, m.dim * sizeof(int));
+
+
+
     int tmp = res->meta.shape[dim1];
     res->meta.shape[dim1] = res->meta.shape[dim2];
     res->meta.shape[dim2] = tmp;
@@ -206,12 +203,12 @@ void _tensor_permute(tensor* t, uint8* dims, tensor* res){
     int new_strides[m.dim];
     int d2;
 
-    tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
-    res->meta.stride = t->meta.stride;
+    tensor_build(m.dim, m.shape, m.e_size, t, NULL, res);
+    memcpy(res->meta.stride, m.stride, sizeof(int) * m.dim);
 
     memcpy(new_shape, m.shape, m.dim * sizeof(int));
-    for(uint8 d=0; d < t->meta.dim; d++){
-        d2 = dims[d];
+    for(uint8 d=0; d < m.dim; d++){
+        d2 = m.dim - dims[d] -1;
         res->meta.shape[d] = m.shape[d2];
         res->meta.stride[d] = m.stride[d2];
     }
