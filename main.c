@@ -1,8 +1,6 @@
-
+#define OMP
 #include "cten.h"
 
-#define OMP
-#include <omp.h>
 
 
 tensor contiguous_handler(context* ctx, op_args args, tensor* res){
@@ -58,9 +56,9 @@ int main(){
     for(int i=0; i < t.meta.size; i++){
         ((float*)t.data)[i] = i;
     }
-    int repeat[3] = {2, 2, 0};
+    uint8 repeat[3] = {1, 0, 2};
 
-    tensor_repeat(&t, repeat, &t1);
+    tensor_clone(&t, &t1);
     tensor_print_data(&t);
     tensor_print_data(&t1);
 

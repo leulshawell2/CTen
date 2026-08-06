@@ -83,29 +83,8 @@ void tensor_free(tensor* t){
 }
 
 void tensor_clone(tensor* t, tensor* res){
-    //copy all the meta in a single memcpy call
-    res->meta.shape = meta_alloc(t->meta.dim);
-
-    if(!res->meta.shape){
-        ERROR(MEM_ERR, MALLOC_ERR, t);
-    }
-
-    res->meta.dim = t->meta.dim;
-    res->meta.e_size = t->meta.e_size;
-    res->meta.size = t->meta.size;
-    res->meta.sub_err = t->meta.sub_err;
-    res->meta.err = t->meta.err;
-    res->meta.stride = res->meta.shape + res->meta.dim;
-    res->meta.__stride = res->meta.stride + res->meta.dim;
-    res->meta.ref   = t->meta.__stride + res->meta.dim; 
-    *res->meta.ref = 0;
-    
-    memcpy(res->meta.shape, t->meta.shape, t->meta.dim * sizeof(int) * 3);
-    res->data = malloc(res->meta.size * res->meta.e_size);
-    if(!res->data){
-        ERROR(MEM_ERR, MALLOC_ERR, t);
-    }
-
+    tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, NULL, NULL, res);
+    memcpy(res->meta.stride, t->meta.stride, t->meta.dim * sizeof(int));
     memcpy(res->data, t->data, res->meta.e_size * res->meta.size);
 }
 
@@ -222,21 +201,22 @@ void tensor_index(tensor* t, int* idxs, tensor* res){
 
         offset += t->meta.stride[d_3] * s;
     }
-    tensor* temp;
+    tensor temp_;
+    tensor* temp = &temp_;
     tensor_build(t->meta.dim, new_shape, t->meta.e_size, t, NULL, temp);
+
     temp->meta.stride = new_strides;
     temp->data += offset * temp->meta.e_size;
 
     tensor_contiguous(temp, res);
-
     tensor_free(temp);
 }
 
 void tensor_transpose(tensor* t, uint8 dim1, uint8 dim2, tensor* res){
     tensor_meta m = t->meta;
     
-    
-    tensor_meta_clone(t, res);
+    tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
+    res->meta.stride = t->meta.stride;
     
     int tmp = res->meta.shape[dim1];
     res->meta.shape[dim1] = res->meta.shape[dim2];
@@ -246,9 +226,6 @@ void tensor_transpose(tensor* t, uint8 dim1, uint8 dim2, tensor* res){
     tmp = m.stride[dim1];
     res->meta.stride[dim1] = m.stride[dim2];
     res->meta.stride[dim2] = tmp;
-
-    *res->meta.ref += 1;
-    res->data = t->data;
 
 }
 
@@ -260,7 +237,8 @@ void tensor_permute(tensor* t, uint8* dims, tensor* res){
     int new_strides[m.dim];
     int d2;
 
-    tensor_meta_clone(t, res);
+    tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
+    res->meta.stride = t->meta.stride;
 
     memcpy(new_shape, m.shape, m.dim * sizeof(int));
     for(uint8 d=0; d < t->meta.dim; d++){

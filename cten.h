@@ -1,6 +1,7 @@
 #include "./core/cten.h"
-
-
+#ifdef OMP
+#include <omp.h>
+#endif
 
 
 #define CT_ERROR(c, sc, ctx)  (ctx)->err = c; (ctx)->sub_err = sc;

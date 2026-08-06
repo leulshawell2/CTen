@@ -2,20 +2,14 @@
 #include "cten.h"
 
 
-
-#ifdef OMP
-#include <omp.h>
-#endif
-
-
-
 void tensor_contiguous(tensor* t, tensor* res){
 
     if (tensor_iscontiguous(t)){
         tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
         return;
-
+        
     }else{
+        tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, NULL, NULL, res);
         tensor_meta res_meta = res->meta;
 
         #ifdef OMP
@@ -24,7 +18,7 @@ void tensor_contiguous(tensor* t, tensor* res){
                 int nthreads = omp_get_num_threads();
                 int tid = omp_get_thread_num();
 
-                int w_ =  res_meta.size + nthreads-1) / nthreads;
+                int w_ =  (res_meta.size + nthreads-1) / nthreads;
                 int start  = tid * w_;
                 int end = start + w_;
                 if (end > res_meta.size){
