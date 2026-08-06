@@ -180,18 +180,21 @@ void _tensor_transpose(tensor* t, uint8 _dim1, uint8 _dim2, tensor* res){
     uint8 dim2 = m.dim - _dim2 - 1;
     
     tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
-    memcpy(res->meta.stride, t->meta.stride, m.dim * sizeof(int));
-
-
-
+    memcpy(res->meta.stride, t->meta.stride,  m.dim * sizeof(int));
+    
+    
+    
     int tmp = res->meta.shape[dim1];
     res->meta.shape[dim1] = res->meta.shape[dim2];
     res->meta.shape[dim2] = tmp;
     
+    meta_stride(res->meta.shape, res->meta.__stride, res->meta.dim);
     
     tmp = m.stride[dim1];
     res->meta.stride[dim1] = m.stride[dim2];
     res->meta.stride[dim2] = tmp;
+
+
 
 }
 
@@ -213,8 +216,6 @@ void _tensor_permute(tensor* t, uint8* dims, tensor* res){
         res->meta.stride[d] = m.stride[d2];
     }
     
-
-    res->data = t->data;
-    *res->meta.ref += 1;
+    meta_stride(res->meta.shape, res->meta.__stride, res->meta.dim);
 }
 

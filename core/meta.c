@@ -15,9 +15,10 @@ void* meta_alloc(int dim){
 }
 
 void meta_stride(int* shape, int* strides, int dim){
-    strides[0] = 1;
-    for (int8 d = 1; d < dim; d++)
-        strides[d] = shape[d-1] * strides[d-1];
+    strides[dim-1] = 1;
+    for (int8 d = dim-1; d > 0; d--)
+        strides[d-1] = shape[d] * strides[d];
+
 }
 
 

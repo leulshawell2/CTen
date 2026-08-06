@@ -23,14 +23,19 @@ int main(){
     for(int i=0; i < t.meta.size; i++){
         ((float*)t.data)[i] = i;
     }
-    int repeat[4] = {3, 2, 2, 2};
+    
+    op_args args = malloc(2 * sizeof(tensor*) + 2 * sizeof(int));
 
-    _tensor_view(&t, repeat, 4, &t1);
-    tensor_print_meta(&t);
-    tensor_print_meta(&t1);
+    ((tensor**)args)[0] = &t2;
+    ((tensor**)args)[1] = &t;
+    ((int*)(args + 2*sizeof(tensor*)))[0] = 0;
+    ((int*)(args + 2*sizeof(tensor*)))[1] = 1;
+
+    uint8 permute[3] = {2, 0, 1};
+    _tensor_permute(&t, permute, &t2);
+
     tensor_print_data(&t);
-    printf("\n\n");
-    tensor_print_data(&t1);
+    tensor_print_data(&t2);
 
     return 0;
 
