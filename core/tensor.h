@@ -17,7 +17,7 @@ typedef struct {
  * 
  * 
  */
-void tensor_build(uint8 dim, int* shape, uint8 e_size, tensor* pr, void* data, tensor* res);
+void tensor_build(uint8 dim, int* shape, uint8 e_size, uint8 dtype, tensor* pr, void* data, tensor* res);
 
 /**
  * frees every memory held by a tensor

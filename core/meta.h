@@ -15,25 +15,36 @@
 
 
 //takes code, sub-code, tensor
-#define ERROR(c, sc, t)  (t)->meta.err = c; (t)->meta.sub_err = sc;
+#define ERROR(c, sc, t)  (t)->meta.err = c; (t)->meta.sub_err = sc; return;
 
 
 #define OP_ERR  1
 #define MEM_ERR 2
 #define THREAD_ERR 3 
-#define MAJOR_ERR_END 4
+#define CORE_MAJOR_ERR_END 4
 
 #define MALLOC_ERR 1
 #define FREE_ERR   2
 #define DIM_ERR    3
 #define SIZE_ERR   4
 #define CONTG_ERR  5
-#define SUB_ERR_END 6
+#define CORE_SUB_ERR_END 6
 
 
-//some helpers i don't want to be function calls
-#define tensor_isshared(t)  *((t)->meta.ref) != 0
-#define tensor_fromother(t) tensor_build((t)->meta.dim, (t)->meta.shape, (t)->meta.e_size, &t, NULL)
+
+
+enum dtypes {
+    None=0,
+    Int32,
+    Int16,
+    Int8,
+    Float32,
+    Float16,
+};
+
+
+
+
 
                         
 
@@ -53,6 +64,7 @@ typedef struct {
     uint8 e_size;
     int err;
     int sub_err;
+    uint8 dtype;
     /**
      * references to the data block; 
      * increamented everytime we build a tensor from the same data block

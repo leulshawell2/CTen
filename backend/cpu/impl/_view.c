@@ -19,7 +19,7 @@ void _tensor_view(tensor* t, int* shape, int dim, tensor* res){
     if(!tensor_iscontiguous(t)){
         ERROR(OP_ERR, CONTG_ERR, res)
     }
-    tensor_build(dim, shape, t->meta.e_size, t, NULL, res);
+    tensor_build(dim, shape, t->meta.e_size, None, t, NULL, res);
 }
 
 void _tensor_reshape(tensor* t, int* shape, int dim, tensor* res){
@@ -51,7 +51,7 @@ void _tensor_broadcast(tensor* t, int* shape, int dim, tensor* res){
         }
     }
 
-    tensor_build(dim, new_shape, t->meta.e_size, t, NULL, res);
+    tensor_build(dim, new_shape, t->meta.e_size, None, t, NULL, res);
     memcpy(res->meta.stride, new_stride, dim * sizeof(int));
     
 
@@ -65,7 +65,7 @@ void _tensor_transpose(tensor* t, uint8 _dim1, uint8 _dim2, tensor* res){
     uint8 dim1 = m.dim - _dim1 - 1;
     uint8 dim2 = m.dim - _dim2 - 1;
     
-    tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
+    tensor_build(t->meta.dim, t->meta.shape, None, t->meta.e_size, t, NULL, res);
     memcpy(res->meta.stride, t->meta.stride,  m.dim * sizeof(int));
     
     int tmp = res->meta.shape[dim1];
@@ -88,7 +88,7 @@ void _tensor_permute(tensor* t, uint8* dims, tensor* res){
     int new_strides[m.dim];
     int d2;
 
-    tensor_build(m.dim, m.shape, m.e_size, t, NULL, res);
+    tensor_build(m.dim, m.shape, m.e_size, None, t, NULL, res);
     memcpy(res->meta.stride, m.stride, sizeof(int) * m.dim);
 
     memcpy(new_shape, m.shape, m.dim * sizeof(int));

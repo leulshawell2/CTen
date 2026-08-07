@@ -4,20 +4,20 @@
 
 
 #define CT_ERROR(c, sc, ctx)  (ctx)->err = c; (ctx)->sub_err = sc;
-
+#define ERROR_FROM_RES(c, t)  (ctx)->err = (t)->meta.err; (ctx)->sub_err = (t)->meta.sub_err; return;
 
 
 
 
 #define EXTRACT_ARG_PTR(type, args) *((type*)args)
 
-//define some major and sub errors for the api
 //major errors
-#define OP_REG_ERR    MAJOR_ERR_END + 1
+#define OP_REG_ERR    CORE_MAJOR_ERR_END + 1
+#define DTYPE_ERROR   CORE_MAJOR_ERR_END + 2
 
 //sub errors
-#define OP_FOUND_ERR  SUB_ERR_END + 1
-#define OP_NOTFOUND_ERR  SUB_ERR_END + 2
+#define FOUND_ERR     CORE_SUB_ERR_END + 1
+#define NOTFOUND_ERR  CORE_SUB_ERR_END + 2
 
 
 

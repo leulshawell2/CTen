@@ -1,5 +1,9 @@
 #include "../../../cten.h"
 
+#ifdef OMP
+#include <omp.h>
+#endif
+
 /**
  * does bioligy clone. Every DNS copied
  * new memory, but every other property of input tensor is cloned
@@ -13,15 +17,12 @@ void _tensor_clone(tensor* t, tensor* res);
  */
 void _tensor_contiguous(tensor* t, tensor* res);
 
-
 /**
  * creates a new tensor (exact but contiguous copy) 
  * it is a call to contiguous
  */
 void _tensor_copy(tensor* t, tensor* res);
 
-
-void _tensor_shape_copy(tensor t, int* buff);
 
 /**
  * allows viewing a tensor with different shape
@@ -72,3 +73,18 @@ void _tensor_transpose(tensor* t, uint8 dim1, uint8 dim2, tensor* res);
  * permute dims.void _tensor_permute(tensor* t, uint8* dims, tensor* res){
  */
 void _tensor_permute(tensor* t, uint8* dims, tensor* res);
+
+/**
+ * naive math op kernels for the cpu =============================
+ */
+
+
+void _tensor_add_float32(tensor* t1, tensor* t2, tensor* res);
+void _tensor_add_int32(tensor* t1, tensor* t2, tensor* res);
+
+void _tensor_sub_float32(tensor* t1, tensor* t2, tensor* res);
+void _tensor_sub_int32(tensor* t1, tensor* t2, tensor* res);
+
+
+void _tensor_cast_int32_float32(tensor* t, tensor* res);
+void _tensor_cast_float32_int32(tensor* t, tensor* res);

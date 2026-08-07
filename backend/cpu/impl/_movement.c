@@ -4,11 +4,13 @@
 void _tensor_contiguous(tensor* t, tensor* res){
 
     if (tensor_iscontiguous(t)){
-        tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t, NULL, res);
+        tensor_meta_clone(res, t);
+        *(t->meta.ref) += 1;
+        res->data = t->data;
         return;
         
     }else{
-        tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, NULL, NULL, res);
+        tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t->meta.dtype, NULL, NULL, res);
         tensor_meta res_meta = res->meta;
 
         #ifdef OMP
@@ -45,7 +47,7 @@ void _tensor_contiguous(tensor* t, tensor* res){
 }
 
 void _tensor_clone(tensor* t, tensor* res){
-    tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, NULL, NULL, res);
+    tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t->meta.dtype, NULL, NULL, res);
     memcpy(res->meta.stride, t->meta.stride, t->meta.dim * sizeof(int));
     memcpy(res->data, t->data, res->meta.e_size * res->meta.size);
 }
@@ -53,7 +55,10 @@ void _tensor_clone(tensor* t, tensor* res){
 
 
 void _tensor_copy(tensor* t, tensor* res){
-    _tensor_contiguous(t, res);
+    if(tensor_iscontiguous(t))
+        _tensor_clone(t, res);
+    else
+        _tensor_contiguous(t, res);
 
 }
 
@@ -74,13 +79,14 @@ void _tensor_repeat(tensor* t, int* repeat, tensor* res){
         new_shape[d_2] = t->meta.shape[d_2] * repeat[d_2];
 
     }
+
     tensor temps[2];
-    tensor_build(temp_dim, shape, t->meta.e_size, t, NULL, temps);
+    tensor_build(temp_dim, shape, t->meta.e_size, None, t, NULL, temps);
     temps->meta.stride = strides;
 
-    tensor_build(temp_dim, shape, t->meta.e_size, NULL, NULL, temps + 1);
+    tensor_build(temp_dim, shape, t->meta.e_size, None, NULL, NULL, temps + 1);
     _tensor_contiguous(temps, temps + 1);
-    tensor_build(t->meta.dim, new_shape, t->meta.e_size, temps + 1, NULL, res);
+    tensor_build(t->meta.dim, new_shape, t->meta.e_size, None, temps + 1, NULL, res);
 
     tensor_free(temps);
     tensor_free(temps + 1);
@@ -105,7 +111,7 @@ void _tensor_index(tensor* t, int* idxs, tensor* res){
     }
     tensor temp_;
     tensor* temp = &temp_;
-    tensor_build(t->meta.dim, new_shape, t->meta.e_size, t, NULL, temp);
+    tensor_build(t->meta.dim, new_shape, t->meta.e_size, None, t, NULL, temp);
 
     temp->meta.stride = new_strides;
     temp->data += offset * temp->meta.e_size;
