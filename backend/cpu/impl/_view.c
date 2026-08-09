@@ -53,11 +53,39 @@ void _tensor_broadcast(tensor* t, int* shape, int dim, tensor* res){
 
     tensor_build(dim, new_shape, t->meta.e_size, None, t, NULL, res);
     memcpy(res->meta.stride, new_stride, dim * sizeof(int));
-    
 
 }
 
 
+void _tensor_broadcast_match(tensor* _t1, tensor* _t2){
+    int max_dim = MAX(_t1->meta.dim, _t2->meta.dim);
+    int new_shape[max_dim];
+
+    if(_t1->meta.dim == _t2->meta.dim){
+        for(int d=0; d < max_dim; d++)
+            new_shape[d] = _t1->meta.shape[d] == 1? _t2->meta.shape[d]: _t1->meta.shape[d];
+    }else {
+        int dim_diff;
+        int* max_shape;
+        int* min_shape;
+        if (max_dim == _t1->meta.dim){
+            max_shape = _t1->meta.shape;
+            min_shape = _t2->meta.shape;
+            dim_diff = _t1->meta.dim - _t2->meta.dim;
+        }else {
+            max_shape = _t2->meta.shape;
+            min_shape = _t1->meta.shape;
+            dim_diff = _t2->meta.dim - _t1->meta.dim;
+        }
+
+
+        for(int d=0; d < max_dim; d++){
+            int s1 = max_shape[d];
+            new_shape[d] = d < dim_diff? s1: s1 == 1? min_shape[d-dim_diff]: s1;
+            printf("%d ", new_shape[d]);
+        };
+    }
+}
 
 
 void _tensor_transpose(tensor* t, uint8 _dim1, uint8 _dim2, tensor* res){

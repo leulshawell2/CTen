@@ -17,29 +17,23 @@ int main(){
     CT_register_op(cpu_ctx, OP_INDEX, tensor_index);
     
     
-    int shape[3] = {3, 4, 3};
+    int shape[4] = {1, 3, 4, 3};
     tensor t ;
     tensor t1;
     tensor t2;
     tensor t3;
 
     tensor_build(3, shape, sizeof(float), Int32, NULL, NULL, &t);
-
     
-    for(int i=0; i < t.meta.size; i++){
-        ((int*)t.data)[i] = i;
-    }
+    tensor_print_meta(&t);
     
-    op_args args = malloc(3 * sizeof(tensor*));
-
-    ((tensor**)args)[0] = &t2;
-    ((tensor**)args)[1] = &t;
-    ((tensor**)args)[2] = &t;
+    shape[1] = 1;
+    shape[2] = 1;
     
-    tensor_add(cpu_ctx, args);
-    tensor_print_data(&t);
-    tensor_print_data(&t2);
-
+    tensor_build(4, shape, sizeof(float), Int32, NULL, NULL, &t1);
+    tensor_print_meta(&t1);
+    _tensor_broadcast_match(&t, &t1);
+    
     return 0;
 
 }

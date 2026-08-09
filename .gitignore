@@ -1,2 +1,5 @@
 a.out
+main
 ./objs
+main.c
+**/*.o

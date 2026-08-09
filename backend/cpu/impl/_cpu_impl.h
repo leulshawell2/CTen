@@ -75,6 +75,12 @@ void _tensor_transpose(tensor* t, uint8 dim1, uint8 dim2, tensor* res);
 void _tensor_permute(tensor* t, uint8* dims, tensor* res);
 
 /**
+ * helper for matching shapes of 2 tensors
+ * assuming the two shapes meet the requirements for broadcasting
+ */
+void _tensor_broadcast_match(tensor* t1, tensor* t2);
+
+/**
  * naive math op kernels for the cpu =============================
  */
 

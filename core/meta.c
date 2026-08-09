@@ -56,4 +56,3 @@ void meta_print(tensor_meta* meta){
         printf("] Error=%d Sub-Error=%d\n", meta->err, meta->sub_err);
         
 }
-
