@@ -12,6 +12,7 @@ typedef struct {
  * @param dim dimension
  * @param shape shape of tensor int[dim]
  * @param e_size size of a single element (use sizeof)
+ * @param dtype what is the data type
  * @param pr a pointer to other tensor to share data block. Keep ref count (only safe way to share)
  * @param data a buffer if you already have. Don't share other tensors like this. Use the pr param.
  * 

@@ -8,10 +8,12 @@ TARGETS = tensor.o \
 		cten.o  \
 		view.o \
 		_view.o\
-		movement.o \
 		_movement.o\
+		movement.o \
+		_binary.o \
 		binary.o \
-		_binary.o 
+		unary.o \
+		_unary.o \
 
 
 SRC = ./core/tensor.c \
@@ -25,7 +27,7 @@ SRC = ./core/tensor.c \
 	 ./backend/cpu/impl/_movement.c \
 	 ./backend/cpu/impl/_unary.c \
 	 ./backend/cpu/impl/_binary.c \
-	./cten.c
+	 ./cten.c
 
 
 main: ${TARGETS} main.o

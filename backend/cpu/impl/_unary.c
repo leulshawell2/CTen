@@ -1,7 +1,6 @@
 #include "_cpu_impl.h"
 
 void _tensor_cast_int32_float32(tensor* t, tensor* res){
-        tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, Float32, NULL, NULL, res);
         tensor_meta res_meta = res->meta;
 
         #ifdef OMP
@@ -30,7 +29,6 @@ void _tensor_cast_int32_float32(tensor* t, tensor* res){
 }
 
 void _tensor_cast_float32_int32(tensor* t, tensor* res){
-        tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, Int32, NULL, NULL, res);
         tensor_meta res_meta = res->meta;
 
         #ifdef OMP
