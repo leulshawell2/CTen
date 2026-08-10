@@ -25,14 +25,18 @@ int main(){
 
     tensor_build(3, shape, sizeof(float), Int32, NULL, NULL, &t);
     
-    tensor_print_meta(&t);
     
     shape[1] = 1;
     shape[2] = 1;
+    shape[3] = 1;
     
     tensor_build(4, shape, sizeof(float), Int32, NULL, NULL, &t1);
+    tensor_print_meta(&t);
     tensor_print_meta(&t1);
-    _tensor_broadcast_match(&t, &t1);
+    _tensor_broadcast_match(&t, &t1, &t, &t2);
+    
+    tensor_print_meta(&t);
+    tensor_print_meta(&t1);
     
     return 0;
 

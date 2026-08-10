@@ -10,6 +10,7 @@ context* CT_context_init(int ops_count){
     context* ctx = malloc(ctx_size);
     if(ctx == NULL){
         CT_ERROR(MEM_ERR, MALLOC_ERR, ctx);
+        return ctx;
     }
     memset(ctx, 0, ctx_size);
     return ctx;
