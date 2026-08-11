@@ -78,7 +78,6 @@ void _tensor_broadcast_match(tensor* _t1, tensor* _t2, tensor* t1, tensor* t2){
             dim_diff = _t2->meta.dim - _t1->meta.dim;
         }
 
-
         for(int d=0; d < max_dim; d++){
             int s1 = max_shape[d];
             new_shape[d] = d < dim_diff? s1: s1 == 1? min_shape[d-dim_diff]: s1;

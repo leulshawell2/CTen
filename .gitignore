@@ -1,5 +1,7 @@
+**/__pycache__
 a.out
 main
 ./objs
 main.c
 **/*.o
+**/*.so

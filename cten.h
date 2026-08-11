@@ -32,8 +32,11 @@
 #define OP_INDEX        7
 #define OP_TRASPOSE     8
 #define OP_PERMUTE      9
+#define OP_ADD          10
+#define OP_SUB          11
+#define OP_CAST         12
 
-#define BASE_OPS_COUNT 10
+#define BASE_OPS_COUNT 13
 
 
 typedef struct context context; 
@@ -44,8 +47,6 @@ typedef void(*op_handler)(context*, op_args);
 typedef struct{
     void* args;
     int op_id;
-    struct op* next;
-    struct op* prev;
 }op;
 
 struct context{

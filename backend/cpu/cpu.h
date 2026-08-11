@@ -1,6 +1,8 @@
 #include "./impl/_cpu_impl.h"
 
 
+#define OPS_COUT 7
+
 void tensor_contiguous(context* ctx, op_args args);
 void tensor_index(context* ctx, op_args args);
 void tensor_transpose(context* ctx, op_args args);

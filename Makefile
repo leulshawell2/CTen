@@ -27,7 +27,6 @@ SRC = ./core/tensor.c \
 	 ./backend/cpu/impl/_movement.c \
 	 ./backend/cpu/impl/_unary.c \
 	 ./backend/cpu/impl/_binary.c \
-	 ./cten.c
 
 
 main: ${TARGETS} main.o
