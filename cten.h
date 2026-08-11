@@ -47,15 +47,16 @@ typedef void(*op_handler)(context*, op_args);
 typedef struct{
     void* args;
     int op_id;
+    struct op* next;
+    struct op* prev;
 }op;
 
 struct context{
 
     int mem_usage;
-    int tensor_count;
     int err;
     int sub_err;
-    
+    int tensor_count;
     op_handler ops_table[];
 };
 
@@ -64,7 +65,7 @@ struct context{
 
 /**
  * this create a context for you.
- * holds the entire program context
+ * hold a table of all ops and also
  */
 context* CT_context_init(int op_count);
 

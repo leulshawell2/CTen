@@ -2,12 +2,8 @@
 
 void tensor_add(context* ctx, op_args args){
     tensor* res = EXTRACT_ARG_PTR(tensor*, args);
-    tensor* _t1 = EXTRACT_ARG_PTR(tensor*, args+1);
-    tensor* _t2 = EXTRACT_ARG_PTR(tensor*, args+2);
-
-    tensor* t1;
-    tensor* t2;
-    _tensor_broadcast_match(_t1, _t2, t1,  t2);
+    tensor* t1 = EXTRACT_ARG_PTR(tensor*, args+1);
+    tensor* t2 = EXTRACT_ARG_PTR(tensor*, args+2);
 
     tensor_build(t1->meta.dim, t1->meta.shape, t1->meta.e_size, t1->meta.dtype, NULL, NULL, res);
 
@@ -33,11 +29,6 @@ void tensor_sub(context* ctx, op_args args){
     tensor* t1 = EXTRACT_ARG_PTR(tensor*, args+1);
     tensor* t2 = EXTRACT_ARG_PTR(tensor*, args+2);
 
-    // tensor t1;
-    // tensor t2;
-
-    //handle type promotion
-    // _tensor_broadcast_match(&_t1,  &_t2, &t1, &t2);
     tensor_build(t1->meta.dim, t1->meta.shape, t1->meta.e_size, None, NULL, NULL, res);
 
     switch (res->meta.dtype)
