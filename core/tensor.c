@@ -70,6 +70,8 @@ void tensor_build(uint8 dim, int* shape, uint8 e_size, uint8 dtype, tensor* pr, 
     res->meta.__stride = res->meta.stride + dim;
     res->meta.ref   = res->meta.__stride + dim;
 
+    *(res->meta.ref) = 0;
+
     res->meta.stride[dim-1] = 1;
     for (int8 d = dim-2; d > -1; d--)
         res->meta.stride[d] = shape[d+1] * res->meta.stride[d+1];

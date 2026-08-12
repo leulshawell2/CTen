@@ -2,11 +2,10 @@
  * initilize the context for lalagrad
  */
 
-#include "ops.c"
+#include "tensor.c"
 
 
 
-context* cpu_ctx;
 
 
 //CTen init
@@ -28,9 +27,10 @@ void CT_init(){
 
 
 //Ops Object Init
-static PyMethodDef Py_Op_Methods[] = {
-    {"add", Py_Op_add, METH_VARARGS},
-    {"repeat", Py_Op_repeat, METH_VARARGS},
+static PyMethodDef Py_Tensor_Methods[] = {
+    {"add", Py_Tensor_add, METH_VARARGS},
+    {"repeat", Py_Tensor_repeat, METH_VARARGS},
+    {"realize", Py_Tensor_realize, METH_NOARGS},
     {NULL}
 };
 
@@ -42,38 +42,8 @@ static PyGetSetDef Ops_Props[] = {
 
 static PyTypeObject Op_Object = {
     PyVarObject_HEAD_INIT(NULL, 0)  
-    .tp_name = "CTen.Ops",  
-    .tp_doc = "The C Ops backend\nThis is the backbone of lalagrad ops\nIt create a graph of ops that get lazilly evaluated",      
-    .tp_basicsize = sizeof(Op), 
-    .tp_itemsize = 0,                 
-    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  
-    .tp_new = Py_Op_new,           
-    .tp_init = (initproc)Py_Op_init, 
-    .tp_dealloc = (destructor)PY_Op_dealloc, 
-    .tp_methods = Py_Op_Methods,   
-    .tp_getset = Ops_Props, 
-};
-
-
-
-
-//Tensor Object Init
-static PyMethodDef Py_Tensor_Methods[] = {
-    {"shape", Py_Tensor_shape, METH_VARARGS},
-    {"strides", Py_Tensor_strides, METH_VARARGS},
-    {NULL}
-};
-
-
-
-static PyGetSetDef Tensor_Props[] = {
-    {NULL}
-};
-
-static PyTypeObject Tensor_Object = {
-    PyVarObject_HEAD_INIT(NULL, 0)  
     .tp_name = "CTen.Tensor",  
-    .tp_doc = "A simpler Tensor api to intact with the underling C tensor object ",      
+    .tp_doc = "The C Ops backend\nThis is the backbone of lalagrad ops\nIt create a graph of ops that get lazilly evaluated",      
     .tp_basicsize = sizeof(Tensor), 
     .tp_itemsize = 0,                 
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,  
@@ -81,8 +51,10 @@ static PyTypeObject Tensor_Object = {
     .tp_init = (initproc)Py_Tensor_init, 
     .tp_dealloc = (destructor)PY_Tensor_dealloc, 
     .tp_methods = Py_Tensor_Methods,   
-    .tp_getset = Tensor_Props, 
+    .tp_getset = Ops_Props, 
 };
+
+
 
 
 static PyMethodDef Module_Methods[] = {
@@ -115,25 +87,17 @@ PyMODINIT_FUNC PyInit_CTen(void) {
     if (PyType_Ready(&Op_Object) < 0)
         return NULL;
 
-    if (PyType_Ready(&Tensor_Object) < 0)
-        return NULL;
-
         
     module = PyModule_Create(&CTen);
     if (module == NULL)
     return NULL;
         
-    if (PyModule_AddObjectRef(module, "Ops", (PyObject *)&Op_Object) < 0) {
+    if (PyModule_AddObjectRef(module, "Tensor", (PyObject *)&Op_Object) < 0) {
         Py_DECREF(&Op_Object);
         Py_DECREF(module);
         return NULL;
     }
     
-    if (PyModule_AddObjectRef(module, "Tensor", (PyObject *)&Tensor_Object) < 0) {
-        Py_DECREF(&Tensor_Object);
-        Py_DECREF(module);
-        return NULL;
-    }
 
     return module;
 }

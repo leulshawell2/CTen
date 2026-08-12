@@ -46,9 +46,10 @@ typedef void(*op_handler)(context*, op_args);
 
 typedef struct{
     void* args;
-    int op_id;
+    int opcode;
     struct op* next;
     struct op* prev;
+    boolean completed;
 }op;
 
 struct context{
@@ -57,6 +58,7 @@ struct context{
     int err;
     int sub_err;
     int tensor_count;
+    op* entry;
     op_handler ops_table[];
 };
 
@@ -73,9 +75,20 @@ context* CT_context_init(int op_count);
  * register an op. Ids  are used as indexes in a table
  */
 
-void  CT_register_op(context* ctx, int op_id, op_handler handler);
+void  CT_register_op(context* ctx, int opcode, op_handler handler);
 
 /**
  * replace an op in the table
  */
-void  CT_replace_op(context* ctx, int op_id, op_handler handler);
+void  CT_replace_op(context* ctx, int opcode, op_handler handler);
+
+/**
+ * 
+ */
+op* CT_op_build(context* ctx,  size_t args_size, int opcode, op* next, op* prev);
+
+
+/**
+ * dispatches the compute graph (a fancy way of saying run a while till you reach the end of the graph)
+ */
+void CT_dispatch_graph(context* ctx, op* entry);
