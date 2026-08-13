@@ -34,7 +34,7 @@ main: ${TARGETS} main.o
 
 
 main.o: main.c
-	gcc -c main.c -o  main.o
+	gcc -c main.c -o main.o
 
 ${TARGETS}:  ${SRC}
 	gcc -c ${SRC}
@@ -42,6 +42,10 @@ ${TARGETS}:  ${SRC}
 
 ${SHARED_LIB}:  ${SRC}
 	gcc -shared  ${SRC} -o ${SHARED_LIB}.so
+
+
+python: ${SHARED_LIB}
+	cd python && python setup.py build_ext --inplace
 
 
 clean:

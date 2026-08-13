@@ -91,6 +91,9 @@ void _tensor_add_int32(tensor* t1, tensor* t2, tensor* res);
 void _tensor_sub_float32(tensor* t1, tensor* t2, tensor* res);
 void _tensor_sub_int32(tensor* t1, tensor* t2, tensor* res);
 
+void _tensor_matmul_float32(tensor* t1, tensor* t2, tensor* res);
+void _tensor_matmul_int32(tensor* t1, tensor* t2, tensor* res);
+
 
 void _tensor_cast_int32_float32(tensor* t, tensor* res);
 void _tensor_cast_float32_int32(tensor* t, tensor* res);

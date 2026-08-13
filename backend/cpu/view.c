@@ -7,7 +7,9 @@
 void tensor_transpose(context* ctx, op_args args){
     tensor* res = EXTRACT_ARG_PTR(tensor*, args);
     tensor* t   = EXTRACT_ARG_PTR(tensor*, args+1);
-    int* dims      = (int*)(args + 2*sizeof(tensor*));
+    int* dims   = *((int**)(args + 2*sizeof(tensor*)));
+
+    printf("%p %p %p\n", res, t, dims);
 
     _tensor_transpose(t, dims[0], dims[1], res);
 

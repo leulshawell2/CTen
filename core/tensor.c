@@ -10,31 +10,25 @@
 void tensor_print_data(tensor* t){
     tensor_meta m = t->meta;
 
-    switch (t->meta.dtype)
-    {
-    case Int32:
-        for (uint i = 0; i < m.size; i++) {
-            int i1 = 0;
-            for(uint8 d=0; d < m.dim; d++){
-                int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
-                i1 += (coord * m.stride[d]);
-            }
+    
 
-            printf("%d,\t", ((int*)t->data)[i1]);
+    for (uint i = 0; i < m.size; i++) {
+        int i1 = 0;
+        for(uint8 d=0; d < m.dim; d++){
+            int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
+            i1 += (coord * m.stride[d]);
         }
-        break;
-    default:
-        for (uint i = 0; i < m.size; i++) {
-                int i1 = 0;
-                for(uint8 d=0; d < m.dim; d++){
-                    int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
-                    i1 += (coord * m.stride[d]);
-                }
-
+        switch (t->meta.dtype){
+            case  Float32:
                 printf("%f,\t", ((float*)t->data)[i1]);
-            }
-            break;
+                break;
+            case  Int32:
+                printf("%d,\t", ((float*)t->data)[i1]);
+                break;
+            default:
+             break;
         }
+    }
     printf("\n");
 
 }
@@ -49,19 +43,20 @@ void tensor_build(uint8 dim, int* shape, uint8 e_size, uint8 dtype, tensor* pr, 
     res->meta.dim = dim;
     res->meta.e_size = e_size;
     res->meta.dtype = dtype;
-    
+
     int size = 1;
     for(uint8 d=0; d < dim; d++) 
         size = size * shape[d];
     res->meta.size = size;
+
     
     
     int meta_size = sizeof(int) * dim;
-    void* meta = meta_alloc(dim);
+    void* meta = malloc(sizeof(int) * dim * 3 + sizeof(int*));
     if(!meta){
         ERROR(MEM_ERR, MALLOC_ERR, res)
     }
-    
+
     
     //build the meta block    
     memcpy(meta, shape, meta_size);

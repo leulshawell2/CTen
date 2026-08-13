@@ -93,6 +93,7 @@ void _tensor_broadcast_match(tensor* _t1, tensor* _t2, tensor* t1, tensor* t2){
 
 void _tensor_transpose(tensor* t, uint8 _dim1, uint8 _dim2, tensor* res){
     tensor_meta m = t->meta;
+
     uint8 dim1 = m.dim - _dim1 - 1;
     uint8 dim2 = m.dim - _dim2 - 1;
     

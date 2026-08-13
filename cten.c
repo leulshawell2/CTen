@@ -35,11 +35,11 @@ void  CT_replace_op(context* ctx, int opcode, op_handler handler){
 
 
 op* CT_op_build(context* ctx,  size_t args_size, int opcode, op* next, op* prev){
-    op* op = malloc(args_size + sizeof(op));
-    // op->args = ((void*)op) + sizeof(op);
-    // op->opcode = opcode;
-    // op->next = (struct op*)next;
-    // op->prev = (struct op*)prev;
+    op* op = malloc(sizeof(op));
+    op->args = malloc(args_size);
+    op->opcode = opcode;
+    op->next = (struct op*)next;
+    op->prev = (struct op*)prev;
     return op;
 }
 

@@ -10,17 +10,7 @@
 
 //CTen init
 void CT_init(){
-    cpu_ctx = CT_context_init(BASE_OPS_COUNT);
-    context* cpu_ctx = CT_context_init(2);
-
-
-    CT_register_op(cpu_ctx, OP_CONTIGUOUS, tensor_contiguous);
-    CT_register_op(cpu_ctx, OP_INDEX, tensor_index);
-    CT_register_op(cpu_ctx, OP_TRASPOSE, tensor_transpose);
-    CT_register_op(cpu_ctx, OP_PERMUTE, tensor_permute);
-    CT_register_op(cpu_ctx, OP_ADD, tensor_add);
-    CT_register_op(cpu_ctx, OP_SUB, tensor_sub);
-    CT_register_op(cpu_ctx, OP_CAST, tensor_cast);
+    
 
 }
 

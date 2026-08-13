@@ -4,12 +4,11 @@
 void _tensor_contiguous(tensor* t, tensor* res){
 
     if (tensor_iscontiguous(t)){
-        tensor_meta_clone(res, t);
-        *(t->meta.ref) += 1;
-        res->data = t->data;
+        _tensor_clone(t, res);
         return;
         
     }else{
+
         tensor_build(t->meta.dim, t->meta.shape, t->meta.e_size, t->meta.dtype, NULL, NULL, res);
         tensor_meta res_meta = res->meta;
 
@@ -111,11 +110,12 @@ void _tensor_index(tensor* t, int* idxs, tensor* res){
     }
     tensor temp_;
     tensor* temp = &temp_;
-    tensor_build(t->meta.dim, new_shape, t->meta.e_size, None, t, NULL, temp);
 
+    tensor_build(t->meta.dim, new_shape, t->meta.e_size, None, t, NULL, temp);
     temp->meta.stride = new_strides;
     temp->data += offset * temp->meta.e_size;
 
+    
     _tensor_contiguous(temp, res);
     tensor_free(temp);
 }
