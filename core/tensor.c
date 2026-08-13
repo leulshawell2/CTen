@@ -7,30 +7,31 @@
 #define tensor_fromother(t) tensor_build((t)->meta.dim, (t)->meta.shape, (t)->meta.e_size, None, &t, NULL)
 
 
+void _tensor_print_dim(tensor* t, int _d, int offset){
+
+    int d = _d;
+    int dim_size = t->meta.shape[d];
+    
+    
+    boolean is_col = d == t->meta.dim-1;
+    for(int i=0; i < dim_size; i++){
+        if(d == t->meta.dim-1){
+            printf("%f, ", ((float*)t->data)[offset + t->meta.stride[d] * i]);
+        }else {
+            printf("\n");
+            _tensor_print_dim(t, d+1, offset + i * t->meta.stride[d]);
+            
+        }
+        
+    }
+    
+}
+
+
 void tensor_print_data(tensor* t){
     tensor_meta m = t->meta;
-
-    
-
-    for (uint i = 0; i < m.size; i++) {
-        int i1 = 0;
-        for(uint8 d=0; d < m.dim; d++){
-            int coord = GET_MIXED_RADIX_DIGIT(i, d, m.__stride, m.shape);
-            i1 += (coord * m.stride[d]);
-        }
-        switch (t->meta.dtype){
-            case  Float32:
-                printf("%f,\t", ((float*)t->data)[i1]);
-                break;
-            case  Int32:
-                printf("%d,\t", ((float*)t->data)[i1]);
-                break;
-            default:
-             break;
-        }
-    }
+    _tensor_print_dim(t, 0, 0);
     printf("\n");
-
 }
 
 

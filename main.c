@@ -1,10 +1,11 @@
 #define OMP
 
-#include "./tests/binary.c"
+// #include "./tests/binary.c"
+#include "./tests/view.c"
 
 
 int main(){
-    binary_f32();
+    view_f32();
 }
 
 
