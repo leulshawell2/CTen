@@ -14,10 +14,11 @@ void _tensor_print_dim(tensor* t, int _d, int offset){
     
     
     boolean is_col = d == t->meta.dim-1;
-    for(int i=0; i < dim_size; i++){
-        if(d == t->meta.dim-1){
-            printf("%f, ", ((float*)t->data)[offset + t->meta.stride[d] * i]);
-        }else {
+    if(d == t->meta.dim-1){
+        for(int i=0; i < dim_size; i++)
+        printf("%f, ", ((float*)t->data)[offset + t->meta.stride[d] * i]);
+    }else {
+        for(int i=0; i < dim_size; i++){
             printf("\n");
             _tensor_print_dim(t, d+1, offset + i * t->meta.stride[d]);
             

@@ -1,5 +1,8 @@
 #include "../../../cten.h"
 
+typedef void(*mapper)(void*, void*);
+
+
 #ifdef OMP
 #include <omp.h>
 #endif
@@ -95,5 +98,13 @@ void _tensor_matmul_float32(tensor* t1, tensor* t2, tensor* res);
 void _tensor_matmul_int32(tensor* t1, tensor* t2, tensor* res);
 
 
+void _tensor_div_float32(tensor* t1, tensor* t2, tensor* res);
+
 void _tensor_cast_int32_float32(tensor* t, tensor* res);
 void _tensor_cast_float32_int32(tensor* t, tensor* res);
+
+
+void _tensor_map(tensor* t,  mapper map, tensor* res);
+
+void _tensor_max_f32(tensor* t, tensor* res);
+void _tensor_min_f32(tensor* t, tensor* res);

@@ -29,7 +29,7 @@ void view_f32(){
     //===============================================
     // tensor_build(3, shape, sizeof(float), Float32, NULL, NULL, t1);
     int idxs[9] = {1, 3, 1,   0, 2, 1,   0, 4, 1};
-    // _tensor_index(t, idxs, t1);
+    _tensor_index(t, idxs, t1);
     //===============================================
 
     tensor_print_meta(t);
