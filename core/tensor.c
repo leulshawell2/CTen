@@ -7,6 +7,7 @@
 #define tensor_fromother(t) tensor_build((t)->meta.dim, (t)->meta.shape, (t)->meta.e_size, None, &t, NULL)
 
 
+
 void _tensor_print_dim(tensor* t, int _d, int offset){
 
     int d = _d;
@@ -92,6 +93,47 @@ void tensor_build(uint8 dim, int* shape, uint8 e_size, uint8 dtype, tensor* pr, 
         }
     }
     
+}
+
+
+void tensor_from_scalar(int dim, int* shape, int e_size, int dtype, void* data, tensor* res){
+    res->meta.err = 0;
+    res->meta.sub_err = 0;
+    res->meta.dim = dim;
+    res->meta.e_size = e_size;
+    res->meta.dtype = dtype;
+
+
+    int size = 1;
+    for(uint8 d=0; d < dim; d++) 
+        size = size * shape[d];
+    res->meta.size = size;
+
+    
+    
+    int meta_size = sizeof(int) * dim;
+    void* meta = malloc(sizeof(int) * dim * 3 + sizeof(int*));
+    if(!meta){
+        ERROR(MEM_ERR, MALLOC_ERR, res)
+    }
+
+    
+    memcpy(meta, shape, meta_size);
+    res->meta.shape = meta;
+    res->meta.stride = meta + meta_size;
+    res->meta.__stride = res->meta.stride + dim;
+    res->meta.ref   = res->meta.__stride + dim;
+
+    *(res->meta.ref) = 0;
+
+    res->meta.__stride[dim-1] = 1;
+    for (int8 d = dim-2; d > -1; d--){
+        res->meta.__stride[d] = shape[d+1] * res->meta.__stride[d+1];
+        res->meta.stride[d] = 0;
+    }
+
+    res->data = data;
+
 }
 
 

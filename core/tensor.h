@@ -37,6 +37,13 @@ void tensor_print_meta(tensor* t);
  */
 boolean tensor_iscontiguous(tensor* t);
 
+/**
+ * creates a tensor from a scalar
+ * it is a 0 stride walk of a scalar
+ */
+
+ void tensor_from_scalar(int dim, int* shape, int e_size, int dtype, void* data, tensor* res);
+
 
 /**
  * clone the meta of a tenor to ther
