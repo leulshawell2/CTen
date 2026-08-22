@@ -182,3 +182,11 @@ void tensor_meta_clone(tensor* dest, tensor* src){
     dest->meta.err = src->meta.err;
     memcpy(dest->meta.shape, dest->meta.shape, sizeof(int) * src->meta.dim * 3 + sizeof(int*));
 }
+
+
+
+void tensors_of_context(tensor* ts, int count, core_context* ctx){
+    for(int i=0; i < count; i++)   {
+        ts[i].meta.ctx = ctx;
+    }
+}

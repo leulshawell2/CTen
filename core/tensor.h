@@ -10,7 +10,13 @@ typedef struct {
 
 
 
-#define tensor_from_ctx(c) {.ctx=(c)}
+/**
+ * this is a macor that creates a tensor and sets the ctx
+ * @param t name of vatiable
+ * @param ctx cten core_context
+ */
+
+#define tensor_from_ctx(t, c) tensor t; t.meta.ctx = c;
 
 
 
@@ -64,3 +70,6 @@ void tensor_meta_clone(tensor* dest, tensor* src);
  * print a tensor data
  */
 void tensor_print_data(tensor* t);
+
+//heloerps for not handling context setting manually
+void tensors_of_context(tensor* ts, int count, core_context* ctx);

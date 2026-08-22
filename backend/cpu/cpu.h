@@ -19,7 +19,6 @@ void init_cpu_context(core_context* ctx){
 
 
 
-
 void tensor_contiguous(context* ctx, op_args args);
 void tensor_index(context* ctx, op_args args);
 void tensor_transpose(context* ctx, op_args args);

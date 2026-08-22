@@ -4,9 +4,15 @@
 
 void view_f32(){
 
+    core_context cpu_ctx;
+
+    init_cpu_context(&cpu_ctx);
+
     tensor _t;
     tensor _t1;
     tensor _t2;
+
+    
 
     tensor* t =  &_t;
     tensor* t1 = &_t1;
