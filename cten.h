@@ -53,7 +53,6 @@ typedef struct{
 }op;
 
 struct context{
-
     int mem_usage;
     int err;
     int sub_err;
@@ -61,9 +60,6 @@ struct context{
     op* entry;
     op_handler ops_table[];
 };
-
-
-
 
 
 

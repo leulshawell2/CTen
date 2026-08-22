@@ -7,6 +7,8 @@ typedef void(*mapper)(void*, void*);
 #include <omp.h>
 #endif
 
+
+
 /**
  * does bioligy clone. Every DNS copied
  * new memory, but every other property of input tensor is cloned

@@ -40,42 +40,47 @@ void tensor_print_data(tensor* t){
 
 
 void tensor_build(uint8 dim, int* shape, uint8 e_size, uint8 dtype, tensor* pr, void* data, tensor* res){
+
+    core_context* ctx = res->meta.ctx;
     
     res->meta.err = 0;
     res->meta.sub_err = 0;
     res->meta.dim = dim;
     res->meta.e_size = e_size;
     res->meta.dtype = dtype;
-
+    
     int size = 1;
     for(uint8 d=0; d < dim; d++) 
         size = size * shape[d];
     res->meta.size = size;
 
     
-    
     int meta_size = sizeof(int) * dim;
-    void* meta = malloc(sizeof(int) * dim * 3 + sizeof(int*));
+    void* meta = ctx->meta_alloc(sizeof(int) * dim * 3 + sizeof(int*));
+    
     if(!meta){
         ERROR(MEM_ERR, MALLOC_ERR, res)
     }
-
+    
     
     //build the meta block    
-    memcpy(meta, shape, meta_size);
+    res->meta.shape = meta;
+    ctx->meta_copy(meta, shape, meta_size);
     res->meta.shape = meta;
     res->meta.stride = meta + meta_size;
     res->meta.__stride = res->meta.stride + dim;
     res->meta.ref   = res->meta.__stride + dim;
-
     *(res->meta.ref) = 0;
 
+    
     res->meta.stride[dim-1] = 1;
     for (int8 d = dim-2; d > -1; d--)
         res->meta.stride[d] = shape[d+1] * res->meta.stride[d+1];
 
 
-    memcpy(res->meta.__stride, res->meta.stride, meta_size);
+    ctx->meta_copy(res->meta.__stride, res->meta.stride, meta_size);
+
+
     
     if(pr){
         //create from other tensor
@@ -87,7 +92,8 @@ void tensor_build(uint8 dim, int* shape, uint8 e_size, uint8 dtype, tensor* pr, 
         //create from void* data
         res->data = data;
     }else{
-        res->data = malloc(size * e_size);
+        res->data = ctx->data_alloc(size * e_size);
+
         if(res->data == NULL){
             ERROR(MEM_ERR, MALLOC_ERR, res)
         }
@@ -97,6 +103,9 @@ void tensor_build(uint8 dim, int* shape, uint8 e_size, uint8 dtype, tensor* pr, 
 
 
 void tensor_from_scalar(int dim, int* shape, int e_size, int dtype, void* data, tensor* res){
+
+    core_context* ctx  = res->meta.ctx;
+
     res->meta.err = 0;
     res->meta.sub_err = 0;
     res->meta.dim = dim;
@@ -112,13 +121,13 @@ void tensor_from_scalar(int dim, int* shape, int e_size, int dtype, void* data, 
     
     
     int meta_size = sizeof(int) * dim;
-    void* meta = malloc(sizeof(int) * dim * 3 + sizeof(int*));
+    void* meta = ctx->meta_alloc(sizeof(int) * dim * 3 + sizeof(int*));
     if(!meta){
         ERROR(MEM_ERR, MALLOC_ERR, res)
     }
 
     
-    memcpy(meta, shape, meta_size);
+    ctx->meta_copy(meta, shape, meta_size);
     res->meta.shape = meta;
     res->meta.stride = meta + meta_size;
     res->meta.__stride = res->meta.stride + dim;
@@ -141,8 +150,8 @@ void tensor_free(tensor* t){
     if(tensor_isshared(t))
         *(t->meta.ref ) -= 1;
     else
-        free(t->data);
-    free(t->meta.shape);
+        t->meta.ctx->data_free(t->data);
+    t->meta.ctx->meta_free(t->meta.shape);
 }
 
 
@@ -154,16 +163,14 @@ void tensor_print_meta(tensor* t){
 }
 
 
-
 boolean tensor_iscontiguous(tensor* t){
-    return (memcmp(t->meta.stride, t->meta.__stride, t->meta.dim) == 0);
+    return (t->meta.ctx->meta_cmp(t->meta.stride, t->meta.__stride, t->meta.dim) == 0);
 }
 
 
 int tensor_size(tensor* t){
     return meta_size(t->meta.shape, t->meta.dim);
 }
-
 
 
 

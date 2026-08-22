@@ -31,6 +31,37 @@
 #define CORE_SUB_ERR_END 6
 
 
+typedef unsigned char uint8;
+typedef uint8 boolean;
+typedef char int8;
+typedef unsigned int uint;
+
+
+
+
+typedef void*(*alloc_func)(size_t);
+typedef void * (*copy_func)(void * restrict,  const void * restrict,  size_t);
+typedef int (*cmp_func)(const void *, const void*, size_t);
+typedef void(*free_func)(void*);
+
+
+
+typedef struct {
+    //allocate memory block
+    alloc_func data_alloc;
+    alloc_func meta_alloc;
+    //copy memory block
+    copy_func data_copy;
+    copy_func meta_copy;
+    //compare memory blocks
+    cmp_func meta_cmp;
+    cmp_func data_cmp;
+    //free a memory block
+    free_func meta_free;
+    free_func data_free;
+}core_context;
+
+
 
 
 enum dtypes {
@@ -43,25 +74,16 @@ enum dtypes {
 };
 
 
-
-
-
-                        
-
-typedef unsigned char uint8;
-typedef uint8 boolean;
-typedef char int8;
-typedef unsigned int uint;
-
 typedef struct {
     int* shape;
     int* stride;
-    //this is always the contiguous stride. 
-    //Never Change. Used for MIxed Radix Count and contiguity check
+    //this is always the contiguous stride. Never Change. Used for MIxed Radix Count and contiguity check
     int* __stride; 
+
     uint8 dim;
     uint size;
     uint8 e_size;
+
     int err;
     int sub_err;
     uint8 dtype;
@@ -69,49 +91,49 @@ typedef struct {
      * references to the data block; 
      * increamented everytime we build a tensor from the same data block
      */
-    
     int* ref; 
+
+    core_context* ctx;
 } tensor_meta;
 
 
 /**
  * calculate a stride for a shape
  */
-void meta_stride(int* shape, int* strides, int dim);
+void meta_stride(int*, int*, int);
 
 
 /**
  * Set the all properties of a tenor meta
  */
-void meta_set(tensor_meta dest, int* shape, int* stride, int dim);
+void meta_set(tensor_meta, int*, int*, int);
 
 /**
  * allocate memory for a tenor_meta block
  * 
  */
-void* meta_alloc(int dim);
+void* meta_alloc(int, core_context*);
 /**
  * calculate size for shape
  */
-int meta_size(int* shape, uint8 dim);
+int meta_size(int*, uint8);
 
 /**
  * print a meta data
  */
-void meta_print(tensor_meta* meta);
+void meta_print(tensor_meta*);
 
 /**
- * free meta data memory (the shape, stride and __stride)
+ * free meta data memory (the, stride and __stride)
  */
-void meta_free(tensor_meta *meta);
+void meta_free(tensor_meta*);
 /**
  * calculate the size of a shape
  */
-int meta_size(int* shape, uint8 dim);
-
+int meta_size(int*, uint8);
 
 /**
  * print a meta data
  */
-void meta_print(tensor_meta* meta);
+void meta_print(tensor_meta*);
 

@@ -1,10 +1,20 @@
 #include "meta.h"
 
+
+
 typedef struct {
     tensor_meta meta;
     void* data;
-    
 } tensor;
+
+
+
+
+#define tensor_from_ctx(c) {.ctx=(c)}
+
+
+
+
 
 
 /**
